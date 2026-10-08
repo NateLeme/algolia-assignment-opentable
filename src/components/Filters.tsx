@@ -8,6 +8,19 @@ import {
 
 const PRICE_LABELS: Record<string, string> = { '2': '$$ · under $30', '3': '$$$ · $31–50', '4': '$$$$ · over $50' };
 
+// Widget options that are functions must be defined once, outside components:
+// React InstantSearch compares options on every render, and a new inline function
+// counts as "changed", which rebuilds the widget → re-render → rebuild… (page freeze).
+const labelPrices = <T extends { value: string; label: string }>(items: T[]) =>
+  items.map((i) => ({ ...i, label: PRICE_LABELS[i.value] ?? i.label }));
+const PRICE_SORT: 'name:asc'[] = ['name:asc'];
+const NoFallback = () => null;
+const RATING_ITEMS = [
+  { label: 'Any rating' },
+  { label: '4.5 and up', start: 4.5 },
+  { label: '4.0 and up', start: 4.0 },
+];
+
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="panel">
@@ -20,11 +33,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 function RatingFilter() {
   const { items, refine } = useNumericMenu({
     attribute: 'rating_score',
-    items: [
-      { label: 'Any rating' },
-      { label: '4.5 and up', start: 4.5 },
-      { label: '4.0 and up', start: 4.0 },
-    ],
+    items: RATING_ITEMS,
   });
   return (
     <Panel title="Rating">
@@ -55,7 +64,7 @@ export function Filters() {
 
       {/* Order of these panels comes from the index's facetOrdering (renderingContent),
           so it can be changed from the Algolia dashboard without a deploy. */}
-      <DynamicWidgets fallbackComponent={() => null}>
+      <DynamicWidgets fallbackComponent={NoFallback}>
         <Panel title="Cuisine region">
           <HierarchicalMenu attributes={['cuisine_hierarchy.lvl0', 'cuisine_hierarchy.lvl1']} limit={8} />
         </Panel>
@@ -65,8 +74,8 @@ export function Filters() {
         <Panel title="Price">
           <RefinementList
             attribute="price"
-            sortBy={['name:asc']}
-            transformItems={(items) => items.map((i) => ({ ...i, label: PRICE_LABELS[i.value] ?? i.label }))}
+            sortBy={PRICE_SORT}
+            transformItems={labelPrices}
           />
         </Panel>
         <Panel title="Dining style">

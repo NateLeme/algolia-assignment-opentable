@@ -11,6 +11,14 @@ import { SORT_OPTIONS } from '../lib/algolia';
 import type { Restaurant } from '../types/restaurant';
 import { RestaurantCard } from './RestaurantCard';
 
+// Defined outside components so their identity is stable across renders (see Filters.tsx).
+const STATS_TRANSLATIONS = {
+  rootElementText: ({ nbHits, processingTimeMS }: { nbHits: number; processingTimeMS: number }) =>
+    `${nbHits.toLocaleString()} restaurants · ${processingTimeMS} ms`,
+};
+const hideBrandRefinement = <T extends { attribute: string }>(items: T[]) =>
+  items.filter((i) => i.attribute !== 'brand');
+
 const SUGGESTED_SEARCHES = ['Italian', 'Sushi', 'Steakhouse', 'Seafood', 'Cheap Mexican', 'Brunch'];
 
 function NoResults() {
@@ -45,17 +53,10 @@ export function Results() {
   return (
     <section className="results">
       <div className="toolbar">
-        <Stats
-          translations={{
-            rootElementText: ({ nbHits, processingTimeMS }) =>
-              `${nbHits.toLocaleString()} restaurants · ${processingTimeMS} ms`,
-          }}
-        />
+        <Stats translations={STATS_TRANSLATIONS} />
         <SortBy items={SORT_OPTIONS} />
       </div>
-      <CurrentRefinements
-        transformItems={(items) => items.filter((i) => i.attribute !== 'brand')}
-      />
+      <CurrentRefinements transformItems={hideBrandRefinement} />
 
       {results.nbHits === 0 && results.__isArtificial !== true ? (
         <NoResults />

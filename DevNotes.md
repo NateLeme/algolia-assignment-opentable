@@ -26,6 +26,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-08 | 3: Frontend (browser test) | To make the prototype usable, started browser testing and fixed a page freeze on any interaction: inline functions passed to InstantSearch widgets looked "changed" on every render and triggered an endless rebuild loop, so they were moved to module scope (confirmed fixed in Chrome). |
 | 2026-10-08 | 2: Relevance tuning (round 1) | To fix the 3 baseline failures, diagnosed each: added "sf"/"nyc" city-filter rules (search fix), accepted "steak" name matches (client data mislabels Steak House No. 316 as American), and tested "upper east side" from Manhattan and Miami (the neighborhood exists in both, so location decides); now 32/32 pass. |
 | 2026-10-08 | 2: Relevance baseline | To measure search quality before tuning, ran the 31-query test suite against the live index (28/31 passed; failures: "steak house" name vs cuisine, "sushi sf" not filtered to the city, "upper east side" ranks 6–10), and added `--only=` to the push script so tuning rounds re-send only what changed. |
 | 2026-10-07 | 3: Frontend (first draft) | To give both personas a modern experience, built a first React InstantSearch UI (instant search, cuisine/price/rating filters, location picker, discovery rows, booking events); written but not yet tested in the browser. |
