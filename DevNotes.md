@@ -183,8 +183,24 @@ Framing: we're treating these files as a real export from OpenTable. Anything we
 |---|---|---|---|---|---|
 -->
 
-| Date | Query / scenario | Expected | Observed | Change made | Result after |
-|---|---|---|---|---|---|
+How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). The suite lives in `scripts/test-relevance.ts`. It uses the search-only key, so it tests exactly what the browser gets.
+
+### Runs
+
+| Date | Run | Result | Notes |
+|---|---|---|---|
+| 2026-10-08 | Round 1 (after fixes below) | **32/32** | 1 rules-only push (`--only=rules`, 15 s); 1 test added (UES from Miami) |
+| 2026-10-08 | Baseline (first config, 5 rules, 12 synonyms) | **28/31** | All 14 known-item (persona 1) tests passed first time: typos, missing apostrophes, concatenation, prefixes, accents, chains by location |
+
+### Failures and fixes
+
+| Date | Query / scenario | Expected | Observed | Diagnosis | Change made | Result after |
+|---|---|---|---|---|---|---|
+| 2026-10-08 | `sushi sf` | Top 5 Japanese in San Francisco | 11 hits incl. San Jose, Millbrae | The "sf" synonym matched the text, but the `detect-city` rule only recognizes full city names, so no city filter was applied and Bay Area restaurants mentioning "San Francisco" came through | **Search fix:** rules `city-abbr-sf` / `city-abbr-nyc` turn "sf"/"nyc" into a city filter and remove the word | ✅ 7 hits, all San Francisco |
+| 2026-10-08 | `steak house` | Top 10 Steakhouse | #1 "Steak House No. 316" (cuisine: American) | Correct name match (name is the top-priority attribute); the client data mislabels the cuisine | **Test fix:** accept Steakhouse cuisine *or* "steak" in name. No config change: demoting a correct name match to hide bad data would be wrong (Client Q4) | ✅ |
+| 2026-10-08 | `upper east side` (no location) | Top 10 in NYC Upper East Side | #6 Ni. Do. Caffé, Miami ("MiMo / Upper East Side") | Not a bug: the neighborhood exists in both cities; with no location, equal matches are ordered by rating | **Test fix:** run from Manhattan (realistic) + new test from Miami | ✅ Manhattan: top 10 all NYC · Miami: Ni. Do. Caffé #1 |
+
+**Takeaway for the debrief:** only 1 of the 3 failures needed a search change. The other two were a data-quality issue and an ambiguous query that location resolves. Diagnose before tuning.
 
 ---
 
