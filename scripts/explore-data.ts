@@ -6,38 +6,7 @@
  *
  * Run:  npm run explore:data
  */
-import { readFileSync } from 'node:fs';
-import Papa from 'papaparse';
-
-// ---------- Raw shapes (exactly as provided by the client) ----------
-interface RawListRecord {
-  objectID: number;
-  name: string;
-  address: string;
-  area: string;
-  city: string;
-  country: string;
-  image_url: string;
-  mobile_reserve_url: string;
-  payment_options: string[];
-  phone: string;
-  postal_code: string;
-  price: number;
-  reserve_url: string;
-  state: string;
-  _geoloc: { lat: number; lng: number };
-}
-
-interface RawInfoRow {
-  objectID: string;
-  food_type: string;
-  stars_count: string;
-  reviews_count: string;
-  neighborhood: string;
-  phone_number: string;
-  price_range: string;
-  dining_style: string;
-}
+import { baseName, loadRawData, type RawInfoRow } from './lib/raw-data';
 
 // ---------- Helpers ----------
 const countBy = <T>(items: T[], key: (item: T) => string): Map<string, number> => {
@@ -61,14 +30,7 @@ const stats = (values: number[]) => {
 };
 
 // ---------- Load ----------
-const list: RawListRecord[] = JSON.parse(
-  readFileSync('data/raw/restaurants_list.json', 'utf8'),
-);
-
-const { data: info, errors } = Papa.parse<RawInfoRow>(
-  readFileSync('data/raw/restaurants_info.csv', 'utf8'),
-  { header: true, delimiter: ';', skipEmptyLines: true },
-);
+const { list, info, parseErrors: errors } = loadRawData();
 
 section('Row counts');
 console.log(`restaurants_list.json: ${list.length}`);
@@ -141,7 +103,6 @@ console.log(`CSV phone_number example: ${info[0].phone_number}`);
 
 // ---------- Chains (persona 1 pain point) ----------
 section('Chains / multi-location brands');
-const baseName = (name: string) => name.split(/\s+[–-]\s+/)[0].trim();
 const brands = countBy(list, (r) => baseName(r.name));
 const chains = [...brands].filter(([, v]) => v > 1);
 console.log(`Brands with 2+ locations: ${chains.length}`);
