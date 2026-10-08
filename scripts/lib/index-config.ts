@@ -159,4 +159,12 @@ export const rules: Rule[] = [
       params: { filters: 'dining_style:"Fine Dining"', query: removeWords('fine', 'dining', 'upscale', 'fancy', 'special', 'occasion') },
     },
   },
+  // City abbreviations. detect-city only recognises full facet values ("San Francisco"),
+  // so "sushi sf" matched SF by synonym text but returned the whole Bay Area.
+  ...Object.entries({ sf: 'San Francisco', nyc: 'New York' }).map(([abbr, city]): Rule => ({
+    objectID: `city-abbr-${abbr}`,
+    description: `"${abbr}" → city:${city} filter`,
+    conditions: contains(abbr),
+    consequence: { params: { filters: `city:"${city}"`, query: removeWords(abbr) } },
+  })),
 ];

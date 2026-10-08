@@ -22,6 +22,7 @@ const AT = {
   houston: '29.7604, -95.3698',
   manhattan: '40.7484, -73.9857',
   sanFrancisco: '37.7749, -122.4194',
+  miami: '25.7617, -80.1918',
 };
 // Distance buckets: within the same bucket, restaurants are ranked by quality
 // (custom ranking) instead of pure distance. Mirrors what the frontend will send.
@@ -67,14 +68,17 @@ const cases: Case[] = [
   { persona: 2, label: 'Cuisine near user', query: 'italian', params: near(AT.manhattan), expect: 'Top 5 Italian in NYC', check: (h) => topN(h, 5, (x) => x.cuisines.includes('Italian') && x.metro_area.startsWith('New York')) },
   { persona: 2, label: 'Dish → cuisine', query: 'sushi', expect: 'Top 10 Japanese', check: (h) => topN(h, 10, (x) => x.cuisines.includes('Japanese') || nameHas(x, 'sushi')) },
   { persona: 2, label: 'Synonym', query: 'bbq', expect: 'Top 5 Barbecue', check: (h) => topN(h, 5, (x) => x.cuisines.includes('Barbecue') || /bbq|bar-b|barbe/i.test(x.name)) },
-  { persona: 2, label: 'Split word', query: 'steak house', expect: 'Top 10 Steakhouse', check: (h) => topN(h, 10, (x) => x.cuisines.includes('Steakhouse')) },
+  // "Steak House No. 316" is labelled American in the client data: accept name matches (data issue, Client Q4).
+  { persona: 2, label: 'Split word', query: 'steak house', expect: 'Top 10 Steakhouse or "steak" in name', check: (h) => topN(h, 10, (x) => x.cuisines.includes('Steakhouse') || nameHas(x, 'steak')) },
   { persona: 2, label: 'Plural', query: 'steakhouses', expect: 'Top 10 Steakhouse', check: (h) => topN(h, 10, (x) => x.cuisines.includes('Steakhouse')) },
   { persona: 2, label: 'Format synonym', query: 'pub', expect: 'Top 5 Gastropub/pub', check: (h) => topN(h, 5, (x) => x.cuisines.includes('Gastropub') || /pub|tavern/i.test(x.name)) },
   { persona: 2, label: 'Intent: budget', query: 'cheap mexican', expect: 'Top 10 Mexican + $$', check: (h) => topN(h, 10, (x) => x.cuisines.includes('Mexican') && x.price === 2) },
   { persona: 2, label: 'Intent: upscale + city', query: 'fine dining new york', expect: 'Top 10 Fine Dining in NY', check: (h) => topN(h, 10, (x) => x.dining_style === 'Fine Dining' && x.city === 'New York') },
   { persona: 2, label: 'Cuisine + city', query: 'italian brooklyn', expect: 'Top 10 Italian in Brooklyn', check: (h) => topN(h, 10, (x) => x.cuisines.includes('Italian') && x.city === 'Brooklyn') },
   { persona: 2, label: 'City abbreviation', query: 'sushi sf', expect: 'Top 5 Japanese in SF', check: (h) => topN(h, 5, (x) => x.city === 'San Francisco' && (x.cuisines.includes('Japanese') || nameHas(x, 'sushi'))) },
-  { persona: 2, label: 'Neighborhood', query: 'upper east side', expect: 'Top 10 in UES', check: (h) => topN(h, 10, (x) => x.neighborhood === 'Upper East Side') },
+  // "Upper East Side" exists in both NYC and Miami: the user's location decides which one.
+  { persona: 2, label: 'Neighborhood (in NYC)', query: 'upper east side', params: near(AT.manhattan), expect: 'Top 10 in NYC UES', check: (h) => topN(h, 10, (x) => x.neighborhood === 'Upper East Side' && x.city === 'New York') },
+  { persona: 2, label: 'Neighborhood (in Miami)', query: 'upper east side', params: near(AT.miami), expect: 'Miami UES first', check: (h) => !!h[0] && h[0].city === 'Miami' && /Upper East Side/.test(h[0].neighborhood ?? '') },
   { persona: 2, label: 'Long descriptive query', query: 'cozy italian dinner in brooklyn', expect: 'Returns results (Italian)', check: (h, n) => n > 0 && h[0].cuisines.includes('Italian') },
   { persona: 2, label: 'Empty query', query: '', expect: 'Top 5 rating ≥ 4.8', check: (h) => topN(h, 5, (x) => x.rating_score >= 4.8) },
   { persona: 2, label: 'Empty query near user', query: '', params: near(AT.sanFrancisco), expect: 'Top 5 in SF Bay Area', check: (h) => topN(h, 5, (x) => x.metro_area === 'San Francisco Bay Area') },

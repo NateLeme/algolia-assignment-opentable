@@ -26,6 +26,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-08 | 2: Relevance tuning (round 1) | To fix the 3 baseline failures, diagnosed each: added "sf"/"nyc" city-filter rules (search fix), accepted "steak" name matches (client data mislabels Steak House No. 316 as American), and tested "upper east side" from Manhattan and Miami (the neighborhood exists in both, so location decides); now 32/32 pass. |
 | 2026-10-08 | 2: Relevance baseline | To measure search quality before tuning, ran the 31-query test suite against the live index (28/31 passed; failures: "steak house" name vs cuisine, "sushi sf" not filtered to the city, "upper east side" ranks 6–10), and added `--only=` to the push script so tuning rounds re-send only what changed. |
 | 2026-10-07 | 3: Frontend (first draft) | To give both personas a modern experience, built a first React InstantSearch UI (instant search, cuisine/price/rating filters, location picker, discovery rows, booking events); written but not yet tested in the browser. |
 | 2026-10-07 | 2: Relevance config | To make search forgiving and intent-aware, wrote the index settings, sort replicas, synonyms and Query Rules as code plus a 31-query relevance test suite; hit the free plan's 3-rule limit, then upgraded to Grow Plus to enable all 5 rules (push still in progress). |
