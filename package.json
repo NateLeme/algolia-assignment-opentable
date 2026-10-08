@@ -14,7 +14,9 @@
     "typecheck": "tsc -b",
     "check:algolia": "tsx scripts/check-connection.ts",
     "explore:data": "tsx scripts/explore-data.ts",
-    "build:records": "tsx scripts/build-records.ts"
+    "build:records": "tsx scripts/build-records.ts",
+    "push:index": "tsx scripts/push-index.ts",
+    "test:relevance": "tsx scripts/test-relevance.ts"
   },
   "dependencies": {
     "algoliasearch": "^5.20.0",

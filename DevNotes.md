@@ -26,6 +26,12 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-07 | 3: Frontend (first draft) | To give both personas a modern experience, built a first React InstantSearch UI (instant search, cuisine/price/rating filters, location picker, discovery rows, booking events); written but not yet tested in the browser. |
+| 2026-10-07 | 2: Relevance config | To make search forgiving and intent-aware, wrote the index settings, sort replicas, synonyms and Query Rules as code plus a 31-query relevance test suite; hit the free plan's 3-rule limit, then upgraded to Grow Plus to enable all 5 rules (push still in progress). |
+| 2026-10-07 | 1: Data prep (repo) | To keep the repo clean and reviewable, removed duplicate assignment files, committed the raw data exactly as provided, documented env vars in the README, and merged GitHub's separate initial history so the work is pushed. |
+| 2026-10-07 | 1: Data prep (build) | To turn the client files into trustworthy search records, wrote `build-records.ts`: it joins both files, fixes prices/states/ZIPs/phones/neighborhoods, adds a rating weighted by review count and chain detection, and fails on bad data. |
+| 2026-10-07 | 1: Data prep (cuisine) | Because cuisine is the main filter and 114 raw values were messy, mapped them to 70 clean cuisines, 8 regions and 20 tags, checking edge cases against actual restaurant names. |
+| 2026-10-07 | 1: Data prep (audit) | To understand the client's data before changing it, audited both files and sorted every issue into fixes with written assumptions vs. questions for OpenTable (§12). |
 
 ---
 
