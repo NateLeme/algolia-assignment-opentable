@@ -16,9 +16,25 @@ A prototype restaurant search and discovery experience built on Algolia, prepare
 ```bash
 nvm use            # Node 24 (see .nvmrc)
 npm install
-cp .env.example .env   # then fill in your Algolia keys
+# create .env with your Algolia keys (see below)
 npm run check:algolia  # verify the keys work
+npm run build:records  # join + clean raw data → data/processed/restaurants.json
 npm run dev            # start the frontend at http://localhost:5173
+```
+
+### Environment variables
+
+Create a `.env` file in the project root (it's git-ignored) with values from Algolia dashboard → Settings → API Keys:
+
+```
+# Bundled into the browser (Vite only exposes VITE_-prefixed vars)
+VITE_ALGOLIA_APP_ID=
+# Search-only key: safe for the browser
+VITE_ALGOLIA_SEARCH_KEY=
+VITE_ALGOLIA_INDEX_NAME=restaurants
+
+# Scripts only: no VITE_ prefix, so Vite never bundles it
+ALGOLIA_ADMIN_KEY=
 ```
 
 ## Project structure
