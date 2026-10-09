@@ -74,6 +74,7 @@ export const settings = (primary: string): IndexSettings => ({
     'searchable(metro_area)',
     'searchable(city)',
     'brand',
+    'filterOnly(state)', // for the state-abbreviation rules ("steakhouse tx")
   ],
 
   // Language: English-only data (assumption 6).
@@ -169,6 +170,25 @@ export const rules: Rule[] = [
       params: { filters: 'dining_style:"Fine Dining"', query: removeWords('fine', 'dining', 'upscale', 'fancy', 'special', 'occasion') },
     },
   },
+  {
+    objectID: 'intent-expensive',
+    description: 'Expensive words → $$$$ price filter (the opposite of intent-budget)',
+    conditions: contains('expensive', 'pricey', 'splurge', 'high end', 'luxury'),
+    consequence: { params: { filters: 'price = 4', query: removeWords('expensive', 'pricey', 'splurge', 'high', 'end', 'luxury') } },
+  },
+  // State abbreviations: "steakhouse tx" → state:TX. Only codes that can't be confused
+  // with a common word or a name token. Excluded: IN OR ME OK HI OH LA AL PA CO ID MS NE
+  // IL MI MO AR (words: "italian in brooklyn", "La Griglia"), MT ("Mt. Fuji"),
+  // ND ("42nd"), NM ("NM Cafe" = Neiman Marcus). Full names ("texas") are excluded too:
+  // they appear in restaurant names ("Texas de Brazil").
+  ...['AZ', 'CA', 'CT', 'FL', 'IA', 'KS', 'MN', 'NC', 'NJ', 'NV', 'NY', 'TN', 'TX', 'WA', 'WI', 'WY'].map(
+    (code): Rule => ({
+      objectID: `state-${code.toLowerCase()}`,
+      description: `"${code.toLowerCase()}" → state:${code} filter`,
+      conditions: contains(code.toLowerCase()),
+      consequence: { params: { filters: `state:${code}`, query: removeWords(code.toLowerCase()) } },
+    }),
+  ),
   // City abbreviations. detect-city only recognises full facet values ("San Francisco"),
   // so "sushi sf" matched SF by synonym text but returned the whole Bay Area.
   ...Object.entries({ sf: 'San Francisco', nyc: 'New York' }).map(([abbr, city]): Rule => ({

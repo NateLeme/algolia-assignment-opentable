@@ -26,6 +26,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-09 | 2: Relevance tuning (round 2) | To test realistic queries and lock in today's bug fixes, expanded the suite to 57 (incl. 7 configuration regression tests); baseline 51/57, then fixed state abbreviations ("steakhouse tx") and "expensive" intent with rules and corrected 4 over-strict tests, now 57/57. |
 | 2026-10-09 | 3: Frontend (UI polish) | To make discovery feel curated and lead somewhere, removed duplicate restaurants across discovery rows, hid row scrollbars behind hover arrows, tidied spacing/type, and added a "See all N" tile per row that opens the full results with the row's exact filter (shown as a chip; Top rated also sorts by rating). |
 | 2026-10-09 | 3: Frontend (UI polish) | To make the demo look like a modern OpenTable product, made the OpenTable wordmark prominent (removed "× Algolia"), shortened the search placeholder, added a "Find your next table" hero with one-tap cuisine chips (exact cuisine filter), slimmed card banners to a cuisine icon and color, and moved rating · price · cuisine right under the name. |
 | 2026-10-09 | 3: Frontend (mobile + sort fixes) | To make the demo work on phones, added a 2-row header, compact horizontal cards and a full-screen Filters sheet; fixed filter panels vanishing on sorts (replicas don't inherit `renderingContent`, now shared with every replica) and made the sort's 50-mile default fall back to any distance with a notice when it finds nothing. |
@@ -200,6 +201,9 @@ How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). T
 
 | Date | Run | Result | Notes |
 |---|---|---|---|
+| 2026-10-09 | Round 2 (after fixes below) | **57/57** | 1 settings + 1 rules push (`--only=settings,rules`); 4 tests adjusted, 2 search fixes; tricky cases still pass ("italian **in** brooklyn" not caught by a state rule, "**texas** de brasil" still finds Texas de Brazil) |
+| 2026-10-09 | Expanded suite baseline: +25 tests (7 known-item, 11 discovery, 7 configuration regression) | **51/57** | All 32 original + all 7 config tests passed; 6 new failures diagnosed below |
+| 2026-10-09 | Regression check after index changes (countable `brand`, `maxValuesPerFacet` 200, replica `relevancyStrictness` 0 + shared `renderingContent`) | **32/32** | Hit counts and applied rules identical to round 1; no relevance impact |
 | 2026-10-08 | Round 1 (after fixes below) | **32/32** | 1 rules-only push (`--only=rules`, 15 s); 1 test added (UES from Miami) |
 | 2026-10-08 | Baseline (first config, 5 rules, 12 synonyms) | **28/31** | All 14 known-item (persona 1) tests passed first time: typos, missing apostrophes, concatenation, prefixes, accents, chains by location |
 
@@ -207,11 +211,19 @@ How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). T
 
 | Date | Query / scenario | Expected | Observed | Diagnosis | Change made | Result after |
 |---|---|---|---|---|---|---|
+| 2026-10-09 | `steakhouse tx` | Top 10 Texas steakhouses | Steakhouses everywhere | `state` wasn't searchable or filterable | **Search fix:** `filterOnly(state)` + 16 state-abbreviation rules (`state-tx` …). Codes that are common words or name tokens excluded (IN, OR, LA, CO, MT "Mt.", NM "NM Cafe"…), and full names excluded ("Texas de Brazil") | ✅ 77 Texas steakhouses |
+| 2026-10-09 | `expensive italian` | Top 10 $$$$ Italian | $$ Italian first | No rule for "expensive": the word matched nothing and `removeWordsIfNoResults` dropped it | **Search fix:** `intent-expensive` rule (expensive/pricey/splurge/high end/luxury → `price = 4`) | ✅ 16 $$$$ Italian |
+| 2026-10-09 | `nubo` | Nobu #1 | Not found | "nubo" → "nobu" is 2 edits; Algolia allows 1 typo for 4–7 letter words, which avoids false matches on short names | **Test fix:** `nobo` (1 typo); documented as a deliberate limit | ✅ |
+| 2026-10-09 | `dim sum` | Yank Sing #1 | ZINE Noodles **Dim Sum** #1 | A name match outranks a tag match (attribute priority): correct | **Test fix:** accept tag or name | ✅ |
+| 2026-10-09 | `asian` | Top 10 Asian region | #7 SOHO **Asian** Bar & Grill (cuisine: Kosher) | Name match is correct; the client data labels the cuisine Kosher | **Test fix:** accept region or name | ✅ |
+| 2026-10-09 | `bay area` (no location) | Top 10 SF Bay Area | Houston results first | Houston has a "Bay Area" neighborhood (Clear Lake): ambiguous, like UES | **Test fix:** run from San Francisco | ✅ |
 | 2026-10-08 | `sushi sf` | Top 5 Japanese in San Francisco | 11 hits incl. San Jose, Millbrae | The "sf" synonym matched the text, but the `detect-city` rule only recognizes full city names, so no city filter was applied and Bay Area restaurants mentioning "San Francisco" came through | **Search fix:** rules `city-abbr-sf` / `city-abbr-nyc` turn "sf"/"nyc" into a city filter and remove the word | ✅ 7 hits, all San Francisco |
 | 2026-10-08 | `steak house` | Top 10 Steakhouse | #1 "Steak House No. 316" (cuisine: American) | Correct name match (name is the top-priority attribute); the client data mislabels the cuisine | **Test fix:** accept Steakhouse cuisine *or* "steak" in name. No config change: demoting a correct name match to hide bad data would be wrong (Client Q4) | ✅ |
 | 2026-10-08 | `upper east side` (no location) | Top 10 in NYC Upper East Side | #6 Ni. Do. Caffé, Miami ("MiMo / Upper East Side") | Not a bug: the neighborhood exists in both cities; with no location, equal matches are ordered by rating | **Test fix:** run from Manhattan (realistic) + new test from Miami | ✅ Manhattan: top 10 all NYC · Miami: Ni. Do. Caffé #1 |
 
-**Takeaway for the debrief:** only 1 of the 3 failures needed a search change. The other two were a data-quality issue and an ambiguous query that location resolves. Diagnose before tuning.
+**Takeaway for the debrief:** across both rounds, only 3 of 9 failures needed a search change; the rest were client-data labels, ambiguous queries that location resolves, or a deliberate typo limit. Diagnose before tuning.
+
+_Round 1:_ only 1 of the 3 failures needed a search change. The other two were a data-quality issue and an ambiguous query that location resolves. Diagnose before tuning.
 
 ### Frontend browser test findings
 
