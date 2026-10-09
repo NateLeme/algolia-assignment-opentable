@@ -17,13 +17,26 @@ export const replicas = (primary: string) => ({
   priceDesc: `${primary}_price_desc`,
 });
 
+// Filter panel order, defined here (not in the UI) so business users can change it from
+// the dashboard without a deploy. Shared by the primary index and every sort replica.
+const renderingContent: IndexSettings['renderingContent'] = {
+  facetOrdering: {
+    facets: { order: ['cuisine_hierarchy.lvl0', 'cuisines', 'price', 'dining_style', 'metro_area', 'tags'] },
+    values: { price: { order: ['2', '3', '4'], sortRemainingBy: 'alpha' } },
+  },
+};
+
+// Replicas don't inherit renderingContent, and the frontend's DynamicWidgets shows no
+// filter panels without it: every sort option needs the same facet ordering.
+const replica = (customRanking: string[]): IndexSettings => ({ customRanking, relevancyStrictness: 0, renderingContent });
+
 export const replicaSettings = (primary: string): Record<string, IndexSettings> => {
   const r = replicas(primary);
   return {
-    [r.rating]: { customRanking: ['desc(rating_score)', 'desc(reviews_count)'], relevancyStrictness: 0 },
-    [r.reviews]: { customRanking: ['desc(reviews_count)', 'desc(rating_score)'], relevancyStrictness: 0 },
-    [r.priceAsc]: { customRanking: ['asc(price)', 'desc(rating_score)'], relevancyStrictness: 0 },
-    [r.priceDesc]: { customRanking: ['desc(price)', 'desc(rating_score)'], relevancyStrictness: 0 },
+    [r.rating]: replica(['desc(rating_score)', 'desc(reviews_count)']),
+    [r.reviews]: replica(['desc(reviews_count)', 'desc(rating_score)']),
+    [r.priceAsc]: replica(['asc(price)', 'desc(rating_score)']),
+    [r.priceDesc]: replica(['desc(price)', 'desc(rating_score)']),
   };
 };
 
@@ -83,14 +96,7 @@ export const settings = (primary: string): IndexSettings => ({
   hitsPerPage: 20,
   maxValuesPerFacet: 200, // 150 chains: all brand counts fit in one response
 
-  // Facet order is defined here, not hard-coded in the UI, so business users can
-  // change it from the dashboard ("Merchandising" without a deploy).
-  renderingContent: {
-    facetOrdering: {
-      facets: { order: ['cuisine_hierarchy.lvl0', 'cuisines', 'price', 'dining_style', 'metro_area', 'tags'] },
-      values: { price: { order: ['2', '3', '4'], sortRemainingBy: 'alpha' } },
-    },
-  },
+  renderingContent, // filter panel order (see above)
 
   replicas: Object.values(replicas(primary)).map((name) => `virtual(${name})`),
 });

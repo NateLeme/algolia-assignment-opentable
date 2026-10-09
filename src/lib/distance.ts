@@ -13,5 +13,9 @@ export const milesToMeters = (miles: number) => Math.round(miles * 1609.34);
 
 export const DistanceContext = createContext<{
   radiusMi: number | null;
+  /** Diner's choice (slider, chip, Clear all). */
   setRadiusMi: (miles: number | null) => void;
-}>({ radiusMi: null, setRadiusMi: () => {} });
+  /** True when the app applied the radius itself (sort default), so it may undo it. */
+  radiusIsAuto: boolean;
+  applyAutoRadius: (miles: number) => void;
+}>({ radiusMi: null, setRadiusMi: () => {}, radiusIsAuto: false, applyAutoRadius: () => {} });

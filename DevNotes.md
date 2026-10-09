@@ -26,6 +26,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-09 | 3: Frontend (mobile + sort fixes) | To make the demo work on phones, added a 2-row header, compact horizontal cards and a full-screen Filters sheet; fixed filter panels vanishing on sorts (replicas don't inherit `renderingContent`, now shared with every replica) and made the sort's 50-mile default fall back to any distance with a notice when it finds nothing. |
 | 2026-10-09 | 3: Frontend (browser test) | To make sorting useful, fixed "Top rated"/price sorts returning 1 result: virtual replicas' default relevancy strictness (100%) treated distance as relevance and kept only the nearest band, so set strictness to 0% and auto-apply a 50-mile radius when a sort is picked; confirmed booking events (conversion with queryID) reach Algolia. |
 | 2026-10-08 | 3: Frontend (browser test) | To make chain links accurate, the "N locations" link now filters by the exact brand (a text search let the cuisine rule pull in Morton's Grille) and shows a live count for the current search and filters (`brand` made countable in the index). |
 | 2026-10-08 | 3: Frontend (browser test) | To keep active filters visible on the discovery page, moved the chips row above the discovery rows, and raised the distance slider to 300 miles so its "150 miles" midpoint label is accurate. |
@@ -227,6 +228,9 @@ How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). T
 | 2026-10-09 | No results (gibberish, filter + query) | Helpful recovery | Suggestions work; "Search without filters" keeps the query by design | — | — | ✅ Passed |
 | 2026-10-09 | Reserve button | Opens OpenTable + sends booking event | Old URL redirects to OpenTable's current restaurant page; conversion event "Restaurant Booked" with `queryID` seen in the Events debugger | — | — | ✅ Passed |
 | 2026-10-09 | Sort "Top rated" / price, Houston + "italian" | Sorted list of Houston Italian | Only 1 result for every sort | Virtual replicas use *relevant sort*; default `relevancyStrictness` 100 keeps only the most relevant hits, and distance counts as relevance → only the nearest distance band (1 of 890) | Strictness 0 on replicas + 50-mile default radius when a sort is picked with distance "Any" | ✅ Confirmed in Chrome |
+| 2026-10-09 | Mobile view (375 px) | Usable on a phone | Header 3 rows (~235 px), ~1.5 cards per screen, filter panel below all results | Desktop layout stacked on small screens | 2-row header, compact horizontal cards (~3–4 per screen), "Filters" button opening a full-screen sheet with "Show N restaurants" | ✅ Confirmed in Chrome |
+| 2026-10-09 | Changed sort (Houston, "italian") | Filter panels stay | Only Rating and Distance left | Sort replicas didn't have `renderingContent`; DynamicWidgets shows no panels without a facet order | One shared `renderingContent` for primary + all replicas | ✅ Confirmed in Chrome |
+| 2026-10-09 | Changed sort with IP-based location | Useful sorted results | 0 results: the auto 50-mile radius around the IP estimate had no matches | Auto default applied blindly | Auto radius is "soft": reverts to any distance on 0 results and shows a notice; diner-set distances are never undone | ✅ Confirmed in Chrome |
 | 2026-10-08 | Typing / clicking any filter | Results update | Page froze | Inline widget options rebuilt widgets on every render (see Dev Log) | Hoisted to module scope | ✅ Fixed (929a03a) |
 
 
@@ -262,6 +266,8 @@ How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). T
 ---
 
 ## 11. Open Questions / TODO
+
+- [ ] **Branding (requested 2026-10-09):** remove "× Algolia" from the header and make the OpenTable brand more prominent, on desktop and mobile.
 
 ---
 

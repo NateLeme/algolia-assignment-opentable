@@ -4,6 +4,8 @@ import {
   HierarchicalMenu,
   RefinementList,
   useClearRefinements,
+  useCurrentRefinements,
+  useInstantSearch,
   useNumericMenu,
 } from 'react-instantsearch';
 import { DistanceContext, MAX_RADIUS_MI } from '../lib/distance';
@@ -109,12 +111,34 @@ function ClearAll() {
   );
 }
 
-export function Filters() {
+/** Phones only (hidden by CSS on desktop): opens the filter sheet, shows how many are active. */
+export function MobileFiltersButton({ onClick }: { onClick: () => void }) {
+  const { items } = useCurrentRefinements();
+  const { radiusMi } = useContext(DistanceContext);
+  const active = items.reduce((n, i) => n + i.refinements.length, 0) + (radiusMi !== null ? 1 : 0);
   return (
-    <aside className="filters">
+    <button className="mobile-filters-button" onClick={onClick}>
+      Filters{active > 0 ? ` (${active})` : ''}
+    </button>
+  );
+}
+
+/** Desktop: sidebar. Phones: full-screen sheet opened by MobileFiltersButton. */
+export function Filters({ open = false, onClose }: { open?: boolean; onClose: () => void }) {
+  const { results } = useInstantSearch();
+
+  // Don't let the page scroll behind the open sheet.
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  return (
+    <aside className={`filters ${open ? 'is-open' : ''}`}>
       <div className="filters-head">
         <h3>Filters</h3>
         <ClearAll />
+        <button className="filters-close" onClick={onClose} aria-label="Close filters">✕</button>
       </div>
 
       <RatingFilter />
@@ -146,6 +170,12 @@ export function Filters() {
           <RefinementList attribute="tags" limit={8} showMore />
         </Panel>
       </DynamicWidgets>
+
+      <div className="filters-foot">
+        <button className="btn-primary" onClick={onClose}>
+          Show {results.nbHits.toLocaleString()} {results.nbHits === 1 ? 'restaurant' : 'restaurants'}
+        </button>
+      </div>
     </aside>
   );
 }
