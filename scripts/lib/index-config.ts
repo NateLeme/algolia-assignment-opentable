@@ -6,7 +6,10 @@ export const indexName = (env = process.env) => env.VITE_ALGOLIA_INDEX_NAME || '
 
 // ---------- Sort replicas ----------
 // Virtual replicas: same records (no extra record usage), different ranking.
-// "Relevant sort": results still have to match the query; the sort just reorders them.
+// relevancyStrictness 0 = sort *every* matching result. The default (100) only sorts the
+// "most relevant" ones, and distance counts as relevance: with a location set, only the
+// nearest distance band survived ("italian" in Houston, Top rated → 1 result of 890).
+// The app keeps sorted results local instead, by defaulting to a 50-mile radius.
 export const replicas = (primary: string) => ({
   rating: `${primary}_rating_desc`,
   reviews: `${primary}_reviews_desc`,
@@ -17,10 +20,10 @@ export const replicas = (primary: string) => ({
 export const replicaSettings = (primary: string): Record<string, IndexSettings> => {
   const r = replicas(primary);
   return {
-    [r.rating]: { customRanking: ['desc(rating_score)', 'desc(reviews_count)'] },
-    [r.reviews]: { customRanking: ['desc(reviews_count)', 'desc(rating_score)'] },
-    [r.priceAsc]: { customRanking: ['asc(price)', 'desc(rating_score)'] },
-    [r.priceDesc]: { customRanking: ['desc(price)', 'desc(rating_score)'] },
+    [r.rating]: { customRanking: ['desc(rating_score)', 'desc(reviews_count)'], relevancyStrictness: 0 },
+    [r.reviews]: { customRanking: ['desc(reviews_count)', 'desc(rating_score)'], relevancyStrictness: 0 },
+    [r.priceAsc]: { customRanking: ['asc(price)', 'desc(rating_score)'], relevancyStrictness: 0 },
+    [r.priceDesc]: { customRanking: ['desc(price)', 'desc(rating_score)'], relevancyStrictness: 0 },
   };
 };
 
@@ -46,7 +49,8 @@ export const settings = (primary: string): IndexSettings => ({
   customRanking: ['desc(rating_score)', 'desc(reviews_count)'],
 
   // Filters. `searchable()` lets the UI search inside a long facet list (70 cuisines).
-  // `filterOnly()` is for filtering without counts, e.g. "other locations of this brand".
+  // `brand` is countable (not filterOnly) so each card's "N locations" link can show how
+  // many locations of that chain match the current search and filters.
   attributesForFaceting: [
     'cuisine_hierarchy.lvl0',
     'cuisine_hierarchy.lvl1',
@@ -56,7 +60,7 @@ export const settings = (primary: string): IndexSettings => ({
     'dining_style',
     'searchable(metro_area)',
     'searchable(city)',
-    'filterOnly(brand)',
+    'brand',
   ],
 
   // Language: English-only data (assumption 6).
@@ -77,7 +81,7 @@ export const settings = (primary: string): IndexSettings => ({
   attributesToHighlight: ['name', 'cuisines', 'tags', 'neighborhood', 'city'],
   attributesToSnippet: [],
   hitsPerPage: 20,
-  maxValuesPerFacet: 100,
+  maxValuesPerFacet: 200, // 150 chains: all brand counts fit in one response
 
   // Facet order is defined here, not hard-coded in the UI, so business users can
   // change it from the dashboard ("Merchandising" without a deploy).

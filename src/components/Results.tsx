@@ -50,10 +50,9 @@ function NoResults() {
   );
 }
 
-export function Results() {
+export function Results({ onShowBrand }: { onShowBrand: (brand: string) => void }) {
   const { items, sendEvent, showMore, isLastPage } = useInfiniteHits<Hit<Restaurant>>();
   const { results } = useInstantSearch();
-  const { refine } = useSearchBox();
   const allSameBrand = items.length > 0 && !!items[0].brand && items.every((h) => h.brand === items[0].brand);
 
   return (
@@ -69,7 +68,7 @@ export function Results() {
         <>
           <div className="grid">
             {items.map((hit) => (
-              <RestaurantCard key={hit.objectID} hit={hit} sendEvent={sendEvent} onShowBrand={refine} showBrandLink={!allSameBrand} />
+              <RestaurantCard key={hit.objectID} hit={hit} sendEvent={sendEvent} onShowBrand={onShowBrand} showBrandLink={!allSameBrand} />
             ))}
           </div>
           {!isLastPage && (

@@ -2,6 +2,7 @@ import type { Hit } from 'instantsearch.js';
 import type { SendEventForHits } from 'instantsearch.js/es/lib/utils';
 import { Highlight } from 'react-instantsearch';
 import { useContext } from 'react';
+import { BrandCountsContext } from '../lib/brands';
 import { formatDistance, LocationContext, placeName } from '../lib/location';
 import type { Restaurant } from '../types/restaurant';
 
@@ -32,6 +33,9 @@ interface Props {
 
 export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = true }: Props) {
   const location = useContext(LocationContext);
+  // Locations of this chain matching the current search + filters (1 = only this card).
+  const brandCounts = useContext(BrandCountsContext);
+  const chainMatches = hit.brand ? brandCounts.get(hit.brand) ?? 0 : 0;
   const distance = formatDistance(hit._rankingInfo?.matchedGeoLocation?.distance);
   // Badge stays short; the tooltip says where it's measured from.
   const distanceTitle = location.source === 'preset' ? `From the center of ${placeName(location)}` : 'From your location';
@@ -78,9 +82,9 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
           <button className="btn-primary" onClick={(e) => { e.stopPropagation(); book(); }}>
             Reserve
           </button>
-          {showBrandLink && hit.brand && hit.brand_locations > 1 && (
+          {showBrandLink && hit.brand && chainMatches > 1 && (
             <button className="btn-link" onClick={(e) => { e.stopPropagation(); onShowBrand(hit.brand!); }}>
-              {hit.brand_locations} locations
+              {chainMatches} locations
             </button>
           )}
         </div>
