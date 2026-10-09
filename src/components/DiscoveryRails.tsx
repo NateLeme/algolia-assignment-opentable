@@ -48,8 +48,8 @@ function RailHits({ collection, onSeeAll, railIndex, visibleIds, onIds, onShowBr
     <div className="rail-body">
       <button className="rail-arrow rail-arrow-left" aria-label="Scroll left" onClick={() => scroll(-1)}>‹</button>
       <div className="rail-track" ref={trackRef}>
-        {shown.map((hit) => (
-          <RestaurantCard key={hit.objectID} hit={hit} sendEvent={sendEvent} onShowBrand={onShowBrand} />
+        {shown.map((hit, i) => (
+          <RestaurantCard key={hit.objectID} hit={hit} position={i} sendEvent={sendEvent} onShowBrand={onShowBrand} />
         ))}
         {/* End of the row: open the full results with this row's exact filter. */}
         <button className="see-all-tile" onClick={() => onSeeAll(collection)}>

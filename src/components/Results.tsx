@@ -71,8 +71,8 @@ export function Results({ onShowBrand }: { onShowBrand: (brand: string) => void 
       ) : (
         <>
           <div className="grid">
-            {items.map((hit) => (
-              <RestaurantCard key={hit.objectID} hit={hit} sendEvent={sendEvent} onShowBrand={onShowBrand} showBrandLink={!allSameBrand} />
+            {items.map((hit, i) => (
+              <RestaurantCard key={hit.objectID} hit={hit} position={i} sendEvent={sendEvent} onShowBrand={onShowBrand} showBrandLink={!allSameBrand} />
             ))}
           </div>
           {!isLastPage && (

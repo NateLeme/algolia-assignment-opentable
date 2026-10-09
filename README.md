@@ -5,6 +5,8 @@ A prototype restaurant search and discovery experience built on Algolia, prepare
 > **Live demo:** https://algolia-assignment-opentable.vercel.app/
 >
 > 🚧 Full write-up of the approach to come.
+>
+> **Note on images:** card photos are *representative cuisine imagery* (Unsplash License), not the restaurants' own photos: every `image_url` in the provided data redirects to OpenTable's generic placeholder. With OpenTable's photo feed they would be replaced by real restaurant photos.
 
 ## Stack
 

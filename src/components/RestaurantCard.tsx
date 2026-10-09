@@ -1,10 +1,10 @@
 import type { Hit } from 'instantsearch.js';
 import type { SendEventForHits } from 'instantsearch.js/es/lib/utils';
 import { Highlight } from 'react-instantsearch';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { badgeFor } from '../lib/badges';
 import { BrandCountsContext } from '../lib/brands';
-import { cuisineGradient, cuisineIcon } from '../lib/cuisineStyle';
+import { cuisineGradient, cuisineIcon, cuisinePhoto } from '../lib/cuisineStyle';
 import { formatDistance, LocationContext, placeName } from '../lib/location';
 import { toggleSaved, useSaved } from '../lib/saved';
 import type { Restaurant } from '../types/restaurant';
@@ -20,9 +20,11 @@ interface Props {
   onShowBrand: (brand: string) => void;
   /** False when every visible result is already this brand, so "N locations" adds nothing. */
   showBrandLink?: boolean;
+  /** Position in its list: neighbouring cards get different cuisine photos. */
+  position?: number;
 }
 
-export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = true }: Props) {
+export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = true, position }: Props) {
   const location = useContext(LocationContext);
   // Locations of this chain matching the current search + filters (1 = only this card).
   const brandCounts = useContext(BrandCountsContext);
@@ -33,6 +35,8 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
   const cuisine = hit.cuisines[0];
   const place = [hit.neighborhood, hit.city].filter(Boolean).join(', ');
   const badge = badgeFor(hit);
+  // Gradient + icon stay underneath: shown while the photo loads, or if it fails.
+  const [photoFailed, setPhotoFailed] = useState(false);
   const isSaved = useSaved().has(hit.objectID);
 
   const save = () => {
@@ -50,6 +54,16 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
     <article className="card" onClick={() => sendEvent('click', hit, 'Restaurant Clicked')}>
       <div className="card-banner" style={{ background: cuisineGradient(cuisine) }}>
         <span className="card-icon" aria-hidden>{cuisineIcon(cuisine)}</span>
+        {!photoFailed && (
+          <img
+            className="card-photo"
+            src={cuisinePhoto(cuisine, hit.objectID, position)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            onError={() => setPhotoFailed(true)}
+          />
+        )}
         {distance && <span className="card-distance" title={distanceTitle}>{distance}</span>}
         {badge && <span className={`card-badge badge-${badge.tone}`}>{badge.label}</span>}
         <button
