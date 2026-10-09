@@ -1,7 +1,8 @@
 import type { Hit } from 'instantsearch.js';
 import type { SendEventForHits } from 'instantsearch.js/es/lib/utils';
 import { Highlight } from 'react-instantsearch';
-import { formatDistance } from '../lib/location';
+import { useContext } from 'react';
+import { formatDistance, LocationContext } from '../lib/location';
 import type { Restaurant } from '../types/restaurant';
 
 // No usable photos in the data (Client Q2), so each card gets a banner colored by
@@ -30,7 +31,8 @@ interface Props {
 }
 
 export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = true }: Props) {
-  const distance = formatDistance(hit._rankingInfo?.matchedGeoLocation?.distance);
+  const showDistance = useContext(LocationContext).source !== 'preset';
+  const distance = showDistance ? formatDistance(hit._rankingInfo?.matchedGeoLocation?.distance) : null;
   const region = hit.cuisine_hierarchy.lvl0[0];
   const place = [hit.neighborhood, hit.city].filter(Boolean).join(', ');
 

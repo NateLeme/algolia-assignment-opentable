@@ -79,12 +79,27 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
 .ais-SearchBox-reset svg { width: 10px; height: 10px; fill: currentColor; }
 
 .location {
-  display: flex; align-items: center; gap: 6px;
-  border: 1.5px solid var(--border); border-radius: 999px; padding: 0 12px;
+  position: relative; display: flex; align-items: center; gap: 6px;
+  border: 1.5px solid var(--border); border-radius: 999px; padding: 0 6px 0 12px;
   background: var(--surface-2);
 }
-.location select { border: 0; background: none; color: var(--text); padding: 11px 0; font: inherit; outline: none; }
+.location:focus-within { border-color: var(--accent); background: var(--surface); }
 .location-pin { color: var(--accent); }
+.location-input { border: 0; background: none; color: var(--text); padding: 11px 0; font: inherit; outline: none; width: 210px; text-overflow: ellipsis; }
+.location-toggle { border: 0; background: none; color: var(--muted); padding: 4px 8px; font-size: 14px; }
+.location-list {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 20;
+  width: 300px; max-height: 360px; overflow-y: auto; margin: 0; padding: 6px; list-style: none;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+}
+.location-option {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14px;
+}
+.location-option.is-active { background: var(--accent-soft); }
+.location-option.is-mine { color: var(--accent); font-weight: 600; border-bottom: 1px solid var(--border); border-radius: 8px 8px 0 0; margin-bottom: 4px; }
+.location-count { color: var(--muted); font-size: 12px; }
+.location-empty { padding: 8px 10px; color: var(--muted); font-size: 14px; }
 
 /* ---------- Layout ---------- */
 .layout {

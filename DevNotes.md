@@ -26,6 +26,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-08 | 3: Frontend (browser test) | To make location useful for any diner, replaced 7 hard-coded cities with all 51 metro areas generated from the data, built a custom typable dropdown, hid distances measured from a metro's center, and made the first discovery row say "Top rated in <metro>". |
 | 2026-10-08 | 3: Frontend (browser test) | To make filters clear at a glance, fixed price chips showing "2/3/4" instead of "$$" labels and the selected cuisine region not being highlighted (CSS targeted the wrong element). |
 | 2026-10-08 | 3: Frontend (browser test) | To make result cards accurate and uncluttered, fixed every card showing "31 mi" (it displayed Algolia's ranking distance band instead of the real distance) and hid the redundant "N locations" link when all visible results are the same chain. |
 | 2026-10-08 | 3: Frontend (browser test) | To make the prototype usable, started browser testing and fixed a page freeze on any interaction: inline functions passed to InstantSearch widgets looked "changed" on every render and triggered an endless rebuild loop, so they were moved to module scope (confirmed fixed in Chrome). |
@@ -211,8 +212,10 @@ How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). T
 |---|---|---|---|---|---|---|
 | 2026-10-08 | Typed `rutss cris` (IP location) | Each card shows its real distance | Every card shows **"31 mi"** | Card read `_rankingInfo.geoDistance`, which is the *ranking* distance rounded to our `aroundPrecision` band (≥50 km → 50,000 m ≈ 31 mi). The real distance is `_rankingInfo.matchedGeoLocation.distance` (e.g. 204 km for Indianapolis). Ranking order was correct. | Show `matchedGeoLocation.distance` on cards | ✅ Fixed (23bbcea), confirmed in Chrome |
 | 2026-10-08 | Typed `rutss cris` | "N locations" link helps find other branches | Every card shows **"31 locations"**, which is redundant when all results are already that chain | The link is shown whenever a restaurant is part of a chain, regardless of what's on screen | Hide the link when all visible results are the same brand | ✅ Fixed (23bbcea), confirmed in Chrome |
-| 2026-10-08 | Selected a price filter | Chip reads "$$ · under $30" | Chip reads "2" | The price labels were applied only to the filter list; the active-filter chips showed the raw tier value | Shared `PRICE_LABELS` (`src/lib/labels.ts`) applied to the chips too | Fixed, awaiting retest |
-| 2026-10-08 | Selected a cuisine region | Selected region highlighted | No highlight | CSS targeted a wrapper element the HierarchicalMenu doesn't render | Style the library's `ais-HierarchicalMenu-link--selected` class | Fixed, awaiting retest |
+| 2026-10-08 | Selected a price filter | Chip reads "$$ · under $30" | Chip reads "2" | The price labels were applied only to the filter list; the active-filter chips showed the raw tier value | Shared `PRICE_LABELS` (`src/lib/labels.ts`) applied to the chips too | ✅ Fixed (dc5a356), confirmed in Chrome |
+| 2026-10-08 | Selected a cuisine region | Selected region highlighted | No highlight | CSS targeted a wrapper element the HierarchicalMenu doesn't render | Style the library's `ais-HierarchicalMenu-link--selected` class | ✅ Fixed (dc5a356), confirmed in Chrome |
+| 2026-10-08 | Location picker (browser test step 3) | Useful way to change location | Only 7 hand-picked cities; distances from a city's center point (0.5–3 mi) weren't meaningful; first row always said "near you"; dropdown not typable | Presets were demo shortcuts hard-coded in the frontend | All 51 metro areas generated from the data (`src/data/metros.json`, center = median restaurant coordinate); distance hidden when a metro is picked; first row reads "Top rated in <metro>"; custom typable dropdown (`LocationPicker.tsx`) | ✅ Confirmed in Chrome |
+| 2026-10-08 | Typing in the search box | One clear (×) button | Two × buttons: a blue one and a gray one | Chrome adds its own clear button to search inputs, on top of InstantSearch's reset button | Hide Chrome's built-in button with CSS | Proposed |
 | 2026-10-08 | Typing / clicking any filter | Results update | Page froze | Inline widget options rebuilt widgets on every render (see Dev Log) | Hoisted to module scope | ✅ Fixed (929a03a) |
 
 
@@ -241,6 +244,9 @@ How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). T
 ---
 
 ## 10. Future Improvements (with more time)
+
+### Nice to have
+- **ZIP code entry in the location picker** (2026-10-08): an extra row where the diner types a ZIP, which is validated (5 digits + exists) and re-centers the search there. Planned data source: the free US Census ZIP (ZCTA) list, ~33K ZIPs with center coordinates (~1 MB, one-time download, works offline, no API cost). Rejected alternatives: ZIPs from our own data (only 1,561, so real ZIPs without restaurants would be "invalid"), and paid geocoding (Google/Mapbox). In production OpenTable would use its existing address/location service; any coordinates plug into Algolia's `aroundLatLng`.
 
 ---
 

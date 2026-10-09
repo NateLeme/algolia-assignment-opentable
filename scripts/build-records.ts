@@ -13,6 +13,8 @@ import { normaliseCuisine } from './lib/cuisine';
 import { baseName, loadRawData } from './lib/raw-data';
 
 const OUTPUT = 'data/processed/restaurants.json';
+// Small, committed: the frontend imports it for the location picker.
+const METROS_OUTPUT = 'src/data/metros.json';
 
 // ---------- Cleanup rules ----------
 
@@ -153,11 +155,31 @@ for (const r of records) {
   if (!r.cuisines.length) throw new Error(`No cuisine on ${r.objectID}`);
 }
 
+// ---------- Metro areas for the frontend location picker ----------
+// Center = median restaurant coordinate (robust to outliers like Redding in the
+// Sacramento area). Derived from our own data, so the list always matches what's searchable.
+const median = (values: number[]) => {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)];
+};
+const byMetro = new Map<string, Restaurant[]>();
+for (const r of records) byMetro.set(r.metro_area, [...(byMetro.get(r.metro_area) ?? []), r]);
+const metros = [...byMetro]
+  .map(([label, rs]) => ({
+    label,
+    latLng: `${median(rs.map((r) => r._geoloc.lat)).toFixed(4)},${median(rs.map((r) => r._geoloc.lng)).toFixed(4)}`,
+    restaurants: rs.length,
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
 // ---------- Write ----------
 mkdirSync('data/processed', { recursive: true });
+mkdirSync('src/data', { recursive: true });
 writeFileSync(OUTPUT, JSON.stringify(records, null, 2));
+writeFileSync(METROS_OUTPUT, JSON.stringify(metros, null, 2) + '\n');
 
 console.log(`✅ ${records.length} records → ${OUTPUT}`);
+console.log(`✅ ${metros.length} metro areas → ${METROS_OUTPUT}`);
 console.log(`   Mean stars (C) = ${meanStars.toFixed(2)}, Bayesian m = ${BAYES_MIN_REVIEWS}`);
 console.log(`   Names trimmed: ${fixes.trimmedNames}`);
 console.log(`   State codes corrected: ${fixes.stateCorrections}`);

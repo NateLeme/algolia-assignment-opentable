@@ -1,0 +1,257 @@
+[
+  {
+    "label": "Cleveland / Akron / Canton",
+    "latLng": "41.4629,-81.5868",
+    "restaurants": 22
+  },
+  {
+    "label": "Coastal North Carolina",
+    "latLng": "34.2355,-77.9486",
+    "restaurants": 3
+  },
+  {
+    "label": "Columbus",
+    "latLng": "40.0490,-83.0036",
+    "restaurants": 66
+  },
+  {
+    "label": "Corpus Christi / McAllen",
+    "latLng": "26.2059,-98.2318",
+    "restaurants": 4
+  },
+  {
+    "label": "Dallas - Fort Worth",
+    "latLng": "32.8164,-96.8092",
+    "restaurants": 117
+  },
+  {
+    "label": "Denver / Colorado",
+    "latLng": "39.7218,-105.0113",
+    "restaurants": 360
+  },
+  {
+    "label": "Detroit / Eastern Michigan",
+    "latLng": "42.3346,-83.0527",
+    "restaurants": 10
+  },
+  {
+    "label": "East Tennessee",
+    "latLng": "35.7437,-84.2411",
+    "restaurants": 9
+  },
+  {
+    "label": "El Paso",
+    "latLng": "31.7702,-106.4891",
+    "restaurants": 7
+  },
+  {
+    "label": "Fayetteville / Northwest Arkansas",
+    "latLng": "36.1377,-94.1887",
+    "restaurants": 3
+  },
+  {
+    "label": "Fresno / San Joaquin Valley",
+    "latLng": "36.8709,-119.8095",
+    "restaurants": 7
+  },
+  {
+    "label": "Hawaii",
+    "latLng": "21.2746,-157.7995",
+    "restaurants": 188
+  },
+  {
+    "label": "Houston",
+    "latLng": "29.7491,-95.4283",
+    "restaurants": 231
+  },
+  {
+    "label": "Idaho",
+    "latLng": "43.6215,-116.2024",
+    "restaurants": 27
+  },
+  {
+    "label": "Indiana",
+    "latLng": "39.8716,-86.1572",
+    "restaurants": 124
+  },
+  {
+    "label": "Iowa",
+    "latLng": "41.5998,-91.7859",
+    "restaurants": 19
+  },
+  {
+    "label": "Jackson Hole / Wyoming",
+    "latLng": "43.5055,-110.7637",
+    "restaurants": 24
+  },
+  {
+    "label": "Jacksonville / Northeast Florida",
+    "latLng": "30.3002,-81.4320",
+    "restaurants": 16
+  },
+  {
+    "label": "Kansas City",
+    "latLng": "39.0146,-94.5974",
+    "restaurants": 71
+  },
+  {
+    "label": "Key West / Florida Keys",
+    "latLng": "24.5592,-81.7978",
+    "restaurants": 30
+  },
+  {
+    "label": "Lake of the Ozarks",
+    "latLng": "38.1865,-92.6600",
+    "restaurants": 7
+  },
+  {
+    "label": "Las Vegas",
+    "latLng": "36.1151,-115.1714",
+    "restaurants": 88
+  },
+  {
+    "label": "Little Rock",
+    "latLng": "34.7616,-92.3003",
+    "restaurants": 6
+  },
+  {
+    "label": "Los Angeles / Orange County",
+    "latLng": "34.0380,-118.2561",
+    "restaurants": 60
+  },
+  {
+    "label": "Memphis",
+    "latLng": "35.1366,-89.9908",
+    "restaurants": 36
+  },
+  {
+    "label": "Miami / Southeast Florida",
+    "latLng": "25.8887,-80.1451",
+    "restaurants": 71
+  },
+  {
+    "label": "Minneapolis - St. Paul",
+    "latLng": "44.9491,-93.2850",
+    "restaurants": 43
+  },
+  {
+    "label": "Mississippi",
+    "latLng": "31.3248,-88.8923",
+    "restaurants": 26
+  },
+  {
+    "label": "Mobile",
+    "latLng": "30.2950,-87.6937",
+    "restaurants": 9
+  },
+  {
+    "label": "Montana",
+    "latLng": "45.7827,-111.0573",
+    "restaurants": 20
+  },
+  {
+    "label": "Nashville",
+    "latLng": "36.1514,-86.7878",
+    "restaurants": 94
+  },
+  {
+    "label": "Nebraska",
+    "latLng": "41.2564,-96.0083",
+    "restaurants": 51
+  },
+  {
+    "label": "New Mexico",
+    "latLng": "35.6803,-105.9479",
+    "restaurants": 68
+  },
+  {
+    "label": "New Orleans / Louisiana",
+    "latLng": "29.9554,-90.0745",
+    "restaurants": 90
+  },
+  {
+    "label": "New York / Tri-State Area",
+    "latLng": "40.7562,-73.9840",
+    "restaurants": 1414
+  },
+  {
+    "label": "North Dakota",
+    "latLng": "46.8292,-100.7712",
+    "restaurants": 5
+  },
+  {
+    "label": "Northern Michigan / Upper Peninsula",
+    "latLng": "44.8507,-85.6190",
+    "restaurants": 5
+  },
+  {
+    "label": "Northwest Florida",
+    "latLng": "30.3853,-86.1673",
+    "restaurants": 22
+  },
+  {
+    "label": "Oklahoma City",
+    "latLng": "35.5152,-97.5253",
+    "restaurants": 49
+  },
+  {
+    "label": "Orlando / Central Florida East",
+    "latLng": "28.5405,-81.3914",
+    "restaurants": 99
+  },
+  {
+    "label": "Palm Springs / Palm Desert Cities",
+    "latLng": "33.7218,-116.3828",
+    "restaurants": 39
+  },
+  {
+    "label": "Philadelphia / New Jersey Suburbs",
+    "latLng": "40.0857,-75.1710",
+    "restaurants": 4
+  },
+  {
+    "label": "Phoenix / Arizona",
+    "latLng": "33.5038,-111.9259",
+    "restaurants": 251
+  },
+  {
+    "label": "Pinehurst",
+    "latLng": "35.1746,-79.3923",
+    "restaurants": 7
+  },
+  {
+    "label": "Pittsburgh",
+    "latLng": "40.4438,-79.9969",
+    "restaurants": 90
+  },
+  {
+    "label": "Portland / Oregon",
+    "latLng": "45.5172,-122.6799",
+    "restaurants": 197
+  },
+  {
+    "label": "Raleigh / Durham / Chapel Hill",
+    "latLng": "35.8653,-78.7814",
+    "restaurants": 119
+  },
+  {
+    "label": "Sacramento / Sacramento Valley",
+    "latLng": "38.5789,-121.4858",
+    "restaurants": 72
+  },
+  {
+    "label": "San Antonio",
+    "latLng": "29.4870,-98.4904",
+    "restaurants": 74
+  },
+  {
+    "label": "San Diego",
+    "latLng": "32.7766,-117.1755",
+    "restaurants": 285
+  },
+  {
+    "label": "San Francisco Bay Area",
+    "latLng": "37.7879,-122.4042",
+    "restaurants": 261
+  }
+]

@@ -5,7 +5,7 @@ import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 import { Results } from './components/Results';
 import { AROUND_PRECISION, INDEX, searchClient } from './lib/algolia';
-import { useUserLocation } from './lib/location';
+import { LocationContext, useUserLocation } from './lib/location';
 
 /** Empty search box and no filters → discovery page; otherwise → results. */
 function Main() {
@@ -50,7 +50,9 @@ export default function App() {
         {...(location.latLng ? { aroundLatLng: location.latLng } : { aroundLatLngViaIP: true })}
       />
       <Header location={location} onChoosePreset={choosePreset} onUseMyLocation={requestBrowserLocation} />
-      <Main />
+      <LocationContext.Provider value={location}>
+        <Main />
+      </LocationContext.Provider>
     </InstantSearch>
   );
 }
