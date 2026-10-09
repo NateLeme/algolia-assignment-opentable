@@ -17,16 +17,20 @@ const REGION_THEME: Record<string, string> = {
   'Bars & Pubs': 'var(--region-bars)',
 };
 
-type RestaurantHit = Hit<Restaurant> & { _rankingInfo?: { geoDistance?: number } };
+// matchedGeoLocation.distance is the real distance. (geoDistance is the ranking value,
+// rounded to our aroundPrecision bands, so everything past 50 km read "31 mi".)
+type RestaurantHit = Hit<Restaurant> & { _rankingInfo?: { matchedGeoLocation?: { distance?: number } } };
 
 interface Props {
   hit: RestaurantHit;
   sendEvent: SendEventForHits;
   onShowBrand: (brand: string) => void;
+  /** False when every visible result is already this brand, so "N locations" adds nothing. */
+  showBrandLink?: boolean;
 }
 
-export function RestaurantCard({ hit, sendEvent, onShowBrand }: Props) {
-  const distance = formatDistance(hit._rankingInfo?.geoDistance);
+export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = true }: Props) {
+  const distance = formatDistance(hit._rankingInfo?.matchedGeoLocation?.distance);
   const region = hit.cuisine_hierarchy.lvl0[0];
   const place = [hit.neighborhood, hit.city].filter(Boolean).join(', ');
 
@@ -70,7 +74,7 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand }: Props) {
           <button className="btn-primary" onClick={(e) => { e.stopPropagation(); book(); }}>
             Reserve
           </button>
-          {hit.brand && hit.brand_locations > 1 && (
+          {showBrandLink && hit.brand && hit.brand_locations > 1 && (
             <button className="btn-link" onClick={(e) => { e.stopPropagation(); onShowBrand(hit.brand!); }}>
               {hit.brand_locations} locations
             </button>

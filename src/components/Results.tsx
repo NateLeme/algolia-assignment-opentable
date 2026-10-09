@@ -49,6 +49,7 @@ export function Results() {
   const { items, sendEvent, showMore, isLastPage } = useInfiniteHits<Hit<Restaurant>>();
   const { results } = useInstantSearch();
   const { refine } = useSearchBox();
+  const allSameBrand = items.length > 0 && !!items[0].brand && items.every((h) => h.brand === items[0].brand);
 
   return (
     <section className="results">
@@ -64,7 +65,7 @@ export function Results() {
         <>
           <div className="grid">
             {items.map((hit) => (
-              <RestaurantCard key={hit.objectID} hit={hit} sendEvent={sendEvent} onShowBrand={refine} />
+              <RestaurantCard key={hit.objectID} hit={hit} sendEvent={sendEvent} onShowBrand={refine} showBrandLink={!allSameBrand} />
             ))}
           </div>
           {!isLastPage && (
