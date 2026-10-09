@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import { CurrentRefinements } from 'react-instantsearch';
+import { CollectionContext } from '../lib/collections';
 import { DistanceContext } from '../lib/distance';
 import { PRICE_LABELS } from '../lib/labels';
 
@@ -20,9 +21,16 @@ const formatRefinementChips = <T extends { attribute: string; refinements: { val
 /** Chips for every active filter, shown at the top of the content area in both views. */
 export function ActiveFilters() {
   const { radiusMi, setRadiusMi } = useContext(DistanceContext);
+  const { collection, setCollection } = useContext(CollectionContext);
 
   return (
     <div className="active-filters">
+      {collection && (
+        <span className="ais-CurrentRefinements-category">
+          {collection.title}
+          <button className="ais-CurrentRefinements-delete" aria-label={`Remove ${collection.title}`} onClick={() => setCollection(null)}>✕</button>
+        </span>
+      )}
       {radiusMi && (
         <span className="ais-CurrentRefinements-category">
           ≤ {radiusMi} {radiusMi === 1 ? 'mile' : 'miles'}

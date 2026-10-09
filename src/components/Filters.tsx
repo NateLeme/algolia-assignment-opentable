@@ -8,6 +8,7 @@ import {
   useInstantSearch,
   useNumericMenu,
 } from 'react-instantsearch';
+import { CollectionContext } from '../lib/collections';
 import { DistanceContext, MAX_RADIUS_MI } from '../lib/distance';
 import { LocationContext, placeName } from '../lib/location';
 import { PRICE_LABELS } from '../lib/labels';
@@ -95,16 +96,17 @@ function DistanceFilter() {
   );
 }
 
-/** Clears Algolia refinements and the distance limit (which isn't an Algolia refinement). */
+/** Clears Algolia refinements plus the distance limit and collection (not Algolia refinements). */
 function ClearAll() {
   const { refine, canRefine } = useClearRefinements();
   const { radiusMi, setRadiusMi } = useContext(DistanceContext);
-  const enabled = canRefine || radiusMi !== null;
+  const { collection, setCollection } = useContext(CollectionContext);
+  const enabled = canRefine || radiusMi !== null || collection !== null;
   return (
     <button
       className={`clear-all ${enabled ? '' : 'is-disabled'}`}
       disabled={!enabled}
-      onClick={() => { refine(); setRadiusMi(null); }}
+      onClick={() => { refine(); setRadiusMi(null); setCollection(null); }}
     >
       Clear all
     </button>
@@ -115,7 +117,8 @@ function ClearAll() {
 export function MobileFiltersButton({ onClick }: { onClick: () => void }) {
   const { items } = useCurrentRefinements();
   const { radiusMi } = useContext(DistanceContext);
-  const active = items.reduce((n, i) => n + i.refinements.length, 0) + (radiusMi !== null ? 1 : 0);
+  const { collection } = useContext(CollectionContext);
+  const active = items.reduce((n, i) => n + i.refinements.length, 0) + (radiusMi !== null ? 1 : 0) + (collection ? 1 : 0);
   return (
     <button className="mobile-filters-button" onClick={onClick}>
       Filters{active > 0 ? ` (${active})` : ''}

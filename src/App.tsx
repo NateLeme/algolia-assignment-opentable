@@ -9,6 +9,7 @@ import { Header } from './components/Header';
 import { Results } from './components/Results';
 import { AROUND_PRECISION, INDEX, searchClient, SORT_OPTIONS } from './lib/algolia';
 import { BrandCountsContext } from './lib/brands';
+import { CollectionContext, type Collection } from './lib/collections';
 import { DistanceContext, milesToMeters, SORT_DEFAULT_RADIUS_MI } from './lib/distance';
 import { LocationContext, placeName, useUserLocation } from './lib/location';
 
@@ -64,11 +65,20 @@ function Main() {
 
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  // "See all" on a discovery row: full results with that row's exact filter (+ its sort).
+  const { collection, setCollection } = useContext(CollectionContext);
+  const seeAll = (c: Collection) => {
+    setCollection(c);
+    setIndexUiState((state) => ({ ...state, page: undefined, ...(c.sortBy ? { sortBy: c.sortBy } : {}) }));
+    window.scrollTo({ top: 0 });
+  };
+
   const isBrowsing =
     !indexUiState.query &&
     !indexUiState.refinementList &&
     !indexUiState.hierarchicalMenu &&
-    !indexUiState.numericMenu;
+    !indexUiState.numericMenu &&
+    !collection;
 
   return (
     <BrandCountsContext.Provider value={brandCounts}>
@@ -79,7 +89,7 @@ function Main() {
           <ActiveFilters />
           {widenedNotice && <p className="notice">{widenedNotice}</p>}
           {isBrowsing && <DiscoveryHero />}
-          {isBrowsing && <DiscoveryRails onShowBrand={showBrand} />}
+          {isBrowsing && <DiscoveryRails onShowBrand={showBrand} onSeeAll={seeAll} />}
           {isBrowsing && <h2 className="section-title">All restaurants</h2>}
           <Results onShowBrand={showBrand} />
         </div>
@@ -92,6 +102,8 @@ export default function App() {
   const { location, choosePreset, requestBrowserLocation } = useUserLocation();
   const [radiusMi, setRadius] = useState<number | null>(null);
   const [radiusIsAuto, setRadiusIsAuto] = useState(false);
+  const [collection, setCollection] = useState<Collection | null>(null);
+  const collectionValue = useMemo(() => ({ collection, setCollection }), [collection]);
   const distance = useMemo(
     () => ({
       radiusMi,
@@ -118,12 +130,15 @@ export default function App() {
         // Distance slider: limit to N miles, or "all" = rank by distance but never exclude.
         aroundRadius={radiusMi ? milesToMeters(radiusMi) : 'all'}
         aroundPrecision={AROUND_PRECISION}
+        filters={collection?.filters ?? ''} // "See all" collection (exact filter), if any
         {...(location.latLng ? { aroundLatLng: location.latLng } : { aroundLatLngViaIP: true })}
       />
       <Header location={location} onChoosePreset={choosePreset} onUseMyLocation={requestBrowserLocation} />
       <LocationContext.Provider value={location}>
         <DistanceContext.Provider value={distance}>
-          <Main />
+          <CollectionContext.Provider value={collectionValue}>
+            <Main />
+          </CollectionContext.Provider>
         </DistanceContext.Provider>
       </LocationContext.Provider>
     </InstantSearch>
