@@ -111,7 +111,7 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
 .ais-RefinementList-label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .ais-RefinementList-checkbox { accent-color: var(--accent); width: 16px; height: 16px; }
 .ais-HierarchicalMenu-link { display: flex; gap: 8px; color: var(--text); text-decoration: none; }
-.ais-HierarchicalMenu-item--selected > div > .ais-HierarchicalMenu-link { font-weight: 700; color: var(--accent); }
+.ais-HierarchicalMenu-link--selected { font-weight: 700; color: var(--accent); }
 .ais-RefinementList-labelText, .ais-HierarchicalMenu-label { flex: 1; }
 .ais-RefinementList-count, .ais-HierarchicalMenu-count {
   font-size: 12px; color: var(--muted); background: var(--surface-2); border-radius: 999px; padding: 1px 8px;

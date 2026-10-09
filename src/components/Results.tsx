@@ -8,6 +8,7 @@ import {
   useSearchBox,
 } from 'react-instantsearch';
 import { SORT_OPTIONS } from '../lib/algolia';
+import { PRICE_LABELS } from '../lib/labels';
 import type { Restaurant } from '../types/restaurant';
 import { RestaurantCard } from './RestaurantCard';
 
@@ -16,8 +17,16 @@ const STATS_TRANSLATIONS = {
   rootElementText: ({ nbHits, processingTimeMS }: { nbHits: number; processingTimeMS: number }) =>
     `${nbHits.toLocaleString()} restaurants · ${processingTimeMS} ms`,
 };
-const hideBrandRefinement = <T extends { attribute: string }>(items: T[]) =>
-  items.filter((i) => i.attribute !== 'brand');
+// Active-filter chips: hide the internal brand filter, and show price as "$$ · under $30"
+// instead of the raw tier number.
+const formatRefinementChips = <T extends { attribute: string; refinements: { value: unknown; label: string }[] }>(items: T[]) =>
+  items
+    .filter((i) => i.attribute !== 'brand')
+    .map((i) =>
+      i.attribute === 'price'
+        ? { ...i, refinements: i.refinements.map((r) => ({ ...r, label: PRICE_LABELS[String(r.value)] ?? r.label })) }
+        : i,
+    );
 
 const SUGGESTED_SEARCHES = ['Italian', 'Sushi', 'Steakhouse', 'Seafood', 'Cheap Mexican', 'Brunch'];
 
@@ -57,7 +66,7 @@ export function Results() {
         <Stats translations={STATS_TRANSLATIONS} />
         <SortBy items={SORT_OPTIONS} />
       </div>
-      <CurrentRefinements transformItems={hideBrandRefinement} />
+      <CurrentRefinements transformItems={formatRefinementChips} />
 
       {results.nbHits === 0 && results.__isArtificial !== true ? (
         <NoResults />

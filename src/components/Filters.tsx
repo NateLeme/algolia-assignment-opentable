@@ -5,8 +5,7 @@ import {
   RefinementList,
   useNumericMenu,
 } from 'react-instantsearch';
-
-const PRICE_LABELS: Record<string, string> = { '2': '$$ · under $30', '3': '$$$ · $31–50', '4': '$$$$ · over $50' };
+import { PRICE_LABELS } from '../lib/labels';
 
 // Widget options that are functions must be defined once, outside components:
 // React InstantSearch compares options on every render, and a new inline function

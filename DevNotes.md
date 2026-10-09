@@ -26,6 +26,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-08 | 3: Frontend (browser test) | To make filters clear at a glance, fixed price chips showing "2/3/4" instead of "$$" labels and the selected cuisine region not being highlighted (CSS targeted the wrong element). |
 | 2026-10-08 | 3: Frontend (browser test) | To make result cards accurate and uncluttered, fixed every card showing "31 mi" (it displayed Algolia's ranking distance band instead of the real distance) and hid the redundant "N locations" link when all visible results are the same chain. |
 | 2026-10-08 | 3: Frontend (browser test) | To make the prototype usable, started browser testing and fixed a page freeze on any interaction: inline functions passed to InstantSearch widgets looked "changed" on every render and triggered an endless rebuild loop, so they were moved to module scope (confirmed fixed in Chrome). |
 | 2026-10-08 | 2: Relevance tuning (round 1) | To fix the 3 baseline failures, diagnosed each: added "sf"/"nyc" city-filter rules (search fix), accepted "steak" name matches (client data mislabels Steak House No. 316 as American), and tested "upper east side" from Manhattan and Miami (the neighborhood exists in both, so location decides); now 32/32 pass. |
@@ -208,8 +209,10 @@ How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). T
 
 | Date | Action | Expected | Observed | Diagnosis | Fix | Status |
 |---|---|---|---|---|---|---|
-| 2026-10-08 | Typed `rutss cris` (IP location) | Each card shows its real distance | Every card shows **"31 mi"** | Card read `_rankingInfo.geoDistance`, which is the *ranking* distance rounded to our `aroundPrecision` band (≥50 km → 50,000 m ≈ 31 mi). The real distance is `_rankingInfo.matchedGeoLocation.distance` (e.g. 204 km for Indianapolis). Ranking order was correct. | Show `matchedGeoLocation.distance` on cards | Fixed, awaiting retest |
-| 2026-10-08 | Typed `rutss cris` | "N locations" link helps find other branches | Every card shows **"31 locations"**, which is redundant when all results are already that chain | The link is shown whenever a restaurant is part of a chain, regardless of what's on screen | Hide the link when all visible results are the same brand | Fixed, awaiting retest |
+| 2026-10-08 | Typed `rutss cris` (IP location) | Each card shows its real distance | Every card shows **"31 mi"** | Card read `_rankingInfo.geoDistance`, which is the *ranking* distance rounded to our `aroundPrecision` band (≥50 km → 50,000 m ≈ 31 mi). The real distance is `_rankingInfo.matchedGeoLocation.distance` (e.g. 204 km for Indianapolis). Ranking order was correct. | Show `matchedGeoLocation.distance` on cards | ✅ Fixed (23bbcea), confirmed in Chrome |
+| 2026-10-08 | Typed `rutss cris` | "N locations" link helps find other branches | Every card shows **"31 locations"**, which is redundant when all results are already that chain | The link is shown whenever a restaurant is part of a chain, regardless of what's on screen | Hide the link when all visible results are the same brand | ✅ Fixed (23bbcea), confirmed in Chrome |
+| 2026-10-08 | Selected a price filter | Chip reads "$$ · under $30" | Chip reads "2" | The price labels were applied only to the filter list; the active-filter chips showed the raw tier value | Shared `PRICE_LABELS` (`src/lib/labels.ts`) applied to the chips too | Fixed, awaiting retest |
+| 2026-10-08 | Selected a cuisine region | Selected region highlighted | No highlight | CSS targeted a wrapper element the HierarchicalMenu doesn't render | Style the library's `ais-HierarchicalMenu-link--selected` class | Fixed, awaiting retest |
 | 2026-10-08 | Typing / clicking any filter | Results update | Page froze | Inline widget options rebuilt widgets on every render (see Dev Log) | Hoisted to module scope | ✅ Fixed (929a03a) |
 
 
