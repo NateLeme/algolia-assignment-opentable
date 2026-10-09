@@ -1,6 +1,7 @@
 import { history } from 'instantsearch.js/es/lib/routers';
 import { useState } from 'react';
 import { Configure, InstantSearch, useInstantSearch, useSearchBox } from 'react-instantsearch';
+import { ActiveFilters } from './components/ActiveFilters';
 import { DiscoveryRails } from './components/DiscoveryRails';
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';
@@ -23,6 +24,7 @@ function Main() {
     <main className="layout">
       <Filters />
       <div className="content">
+        <ActiveFilters />
         {isBrowsing && <DiscoveryRails onShowBrand={refine} />}
         {isBrowsing && <h2 className="section-title">All restaurants</h2>}
         <Results />

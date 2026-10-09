@@ -54,7 +54,7 @@ function RatingFilter() {
   );
 }
 
-// Slider positions 1…150 = miles; one extra position at the end = any distance.
+// Slider positions 1…300 = miles; one extra position at the end = any distance.
 const ANY_POSITION = MAX_RADIUS_MI + 1;
 // Search only once the slider stops moving, not on every pixel of a drag.
 const SLIDER_COMMIT_MS = 300;
@@ -87,7 +87,7 @@ function DistanceFilter() {
           aria-label="Maximum distance in miles"
           aria-valuetext={position >= ANY_POSITION ? 'Any distance' : `${position} miles`}
         />
-        <div className="distance-scale muted"><span>1 mile</span><span>{MAX_RADIUS_MI} miles</span><span>Any</span></div>
+        <div className="distance-scale muted"><span>1 mile</span><span>{MAX_RADIUS_MI / 2} miles</span><span>Any</span></div>
       </div>
     </Panel>
   );

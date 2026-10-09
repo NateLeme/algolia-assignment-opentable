@@ -161,6 +161,8 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
   background: var(--surface); color: var(--text); font: inherit;
 }
 .active-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; align-items: center; }
+/* No chips → no empty gap above the content. */
+.active-filters:not(:has(.ais-CurrentRefinements-item, > .ais-CurrentRefinements-category)) { display: none; }
 .ais-CurrentRefinements-list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .ais-CurrentRefinements-item { display: flex; gap: 6px; align-items: center; }
 .ais-CurrentRefinements-label { display: none; }

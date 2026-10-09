@@ -26,6 +26,8 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-08 | 3: Frontend (browser test) | To keep active filters visible on the discovery page, moved the chips row above the discovery rows, and raised the distance slider to 300 miles so its "150 miles" midpoint label is accurate. |
+| 2026-10-08 | 3: Frontend (browser test) | To let diners limit how far they'll travel, added a distance slider (1–150 miles + Any) below Rating that sets Algolia's `aroundRadius` (a geo parameter, not a facet) and only searches once the slider stops; also removed the duplicate × in search boxes and simplified distance labels to "miles" with the place named on the slider. |
 | 2026-10-08 | 3: Frontend (browser test) | To make location useful for any diner, replaced 7 hard-coded cities with all 51 metro areas generated from the data, built a custom typable dropdown, hid distances measured from a metro's center, and made the first discovery row say "Top rated in <metro>". |
 | 2026-10-08 | 3: Frontend (browser test) | To make filters clear at a glance, fixed price chips showing "2/3/4" instead of "$$" labels and the selected cuisine region not being highlighted (CSS targeted the wrong element). |
 | 2026-10-08 | 3: Frontend (browser test) | To make result cards accurate and uncluttered, fixed every card showing "31 mi" (it displayed Algolia's ranking distance band instead of the real distance) and hid the redundant "N locations" link when all visible results are the same chain. |
@@ -216,6 +218,8 @@ How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). T
 | 2026-10-08 | Selected a cuisine region | Selected region highlighted | No highlight | CSS targeted a wrapper element the HierarchicalMenu doesn't render | Style the library's `ais-HierarchicalMenu-link--selected` class | ✅ Fixed (dc5a356), confirmed in Chrome |
 | 2026-10-08 | Location picker (browser test step 3) | Useful way to change location | Only 7 hand-picked cities; distances from a city's center point (0.5–3 mi) weren't meaningful; first row always said "near you"; dropdown not typable | Presets were demo shortcuts hard-coded in the frontend | All 51 metro areas generated from the data (`src/data/metros.json`, center = median restaurant coordinate); distance hidden when a metro is picked; first row reads "Top rated in <metro>"; custom typable dropdown (`LocationPicker.tsx`) | ✅ Confirmed in Chrome |
 | 2026-10-08 | Typing in the search box | One clear (×) button | Two × buttons: a blue one and a gray one | Chrome adds its own clear button to search inputs, on top of InstantSearch's reset button | Hide the browser's built-in button with CSS (`::-webkit-search-cancel-button`) | ✅ Confirmed in Chrome |
+| 2026-10-08 | Set distance on the discovery page | Distance chip visible | Chip appeared below the 4 discovery rows | Chips row lived inside the "All restaurants" results section | Moved to `ActiveFilters.tsx` at the top of the content area | ✅ Confirmed in Chrome |
+| 2026-10-08 | Distance slider scale | Labels match positions | "150 miles" shown mid-bar while 150 was the maximum | Middle label was the max value | Max raised to 300 miles; middle label = max / 2 | ✅ Confirmed in Chrome |
 | 2026-10-08 | Typing / clicking any filter | Results update | Page froze | Inline widget options rebuilt widgets on every render (see Dev Log) | Hoisted to module scope | ✅ Fixed (929a03a) |
 
 
