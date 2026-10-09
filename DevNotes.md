@@ -15,7 +15,7 @@ Newest entries go at the top of each section. Each entry is dated.
 | Dataset | `restaurants_list.json` (~5,000 records) + `restaurants_info.csv` (`;`-separated), joined on `objectID` |
 | Stack | TypeScript · Node indexing script (`algoliasearch` v5) · React + Vite + React InstantSearch + Autocomplete · Vercel |
 | Repo | https://github.com/NateLeme/algolia-assignment-opentable |
-| Live demo | _TBD_ |
+| Live demo | https://algolia-assignment-opentable.vercel.app/ |
 | Algolia app / index | Free (Build) plan · index `restaurants` |
 
 ---
@@ -26,6 +26,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-09 | 5: Ship (deploy) | To make the demo public safely, created a dedicated search-only public key (restaurants indices only, 1,000 searches per visitor per hour, max 100 hits, locked to the Vercel URL; verified other origins get 403) and deployed to Vercel at https://algolia-assignment-opentable.vercel.app/ with auto-redeploy on push. |
 | 2026-10-09 | 2: Relevance tuning (round 2) | To test realistic queries and lock in today's bug fixes, expanded the suite to 57 (incl. 7 configuration regression tests); baseline 51/57, then fixed state abbreviations ("steakhouse tx") and "expensive" intent with rules and corrected 4 over-strict tests, now 57/57. |
 | 2026-10-09 | 3: Frontend (UI polish) | To make discovery feel curated and lead somewhere, removed duplicate restaurants across discovery rows, hid row scrollbars behind hover arrows, tidied spacing/type, and added a "See all N" tile per row that opens the full results with the row's exact filter (shown as a chip; Top rated also sorts by rating). |
 | 2026-10-09 | 3: Frontend (UI polish) | To make the demo look like a modern OpenTable product, made the OpenTable wordmark prominent (removed "× Algolia"), shortened the search placeholder, added a "Find your next table" hero with one-tap cuisine chips (exact cuisine filter), slimmed card banners to a cuisine icon and color, and moved rating · price · cuisine right under the name. |

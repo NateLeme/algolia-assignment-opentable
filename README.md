@@ -2,7 +2,9 @@
 
 A prototype restaurant search and discovery experience built on Algolia, prepared as part of the Algolia Solutions Engineer hiring assignment.
 
-> 🚧 Work in progress. Live demo link and full write-up to come.
+> **Live demo:** https://algolia-assignment-opentable.vercel.app/
+>
+> 🚧 Full write-up of the approach to come.
 
 ## Stack
 
