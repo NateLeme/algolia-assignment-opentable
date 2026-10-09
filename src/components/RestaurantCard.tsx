@@ -3,21 +3,9 @@ import type { SendEventForHits } from 'instantsearch.js/es/lib/utils';
 import { Highlight } from 'react-instantsearch';
 import { useContext } from 'react';
 import { BrandCountsContext } from '../lib/brands';
+import { cuisineGradient, cuisineIcon } from '../lib/cuisineStyle';
 import { formatDistance, LocationContext, placeName } from '../lib/location';
 import type { Restaurant } from '../types/restaurant';
-
-// No usable photos in the data (Client Q2), so each card gets a banner colored by
-// cuisine region instead of 5,000 identical placeholder images.
-const REGION_THEME: Record<string, string> = {
-  'American': 'var(--region-american)',
-  'European': 'var(--region-european)',
-  'Asian': 'var(--region-asian)',
-  'Latin American & Caribbean': 'var(--region-latin)',
-  'Mediterranean & Middle Eastern': 'var(--region-med)',
-  'African': 'var(--region-african)',
-  'International & Fusion': 'var(--region-intl)',
-  'Bars & Pubs': 'var(--region-bars)',
-};
 
 // matchedGeoLocation.distance is the real distance. (geoDistance is the ranking value,
 // rounded to our aroundPrecision bands, so everything past 50 km read "31 mi".)
@@ -39,7 +27,7 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
   const distance = formatDistance(hit._rankingInfo?.matchedGeoLocation?.distance);
   // Badge stays short; the tooltip says where it's measured from.
   const distanceTitle = location.source === 'preset' ? `From the center of ${placeName(location)}` : 'From your location';
-  const region = hit.cuisine_hierarchy.lvl0[0];
+  const cuisine = hit.cuisines[0];
   const place = [hit.neighborhood, hit.city].filter(Boolean).join(', ');
 
   const book = () => {
@@ -50,8 +38,8 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
 
   return (
     <article className="card" onClick={() => sendEvent('click', hit, 'Restaurant Clicked')}>
-      <div className="card-banner" style={{ background: REGION_THEME[region] }}>
-        <span className="card-monogram" aria-hidden>{hit.name.charAt(0)}</span>
+      <div className="card-banner" style={{ background: cuisineGradient(cuisine) }}>
+        <span className="card-icon" aria-hidden>{cuisineIcon(cuisine)}</span>
         {distance && <span className="card-distance" title={distanceTitle}>{distance}</span>}
       </div>
 
@@ -60,10 +48,6 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
           <Highlight attribute="name" hit={hit} />
         </h3>
 
-        <p className="card-place">
-          {place} · {hit.state}
-        </p>
-
         <p className="card-meta">
           <span className="rating" aria-label={`${hit.stars_count} stars`}>★ {hit.stars_count.toFixed(1)}</span>
           <span className="muted">({hit.reviews_count.toLocaleString()})</span>
@@ -71,6 +55,10 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
           <span>{hit.price_label}</span>
           <span className="dot">·</span>
           <span>{hit.cuisines.join(', ')}</span>
+        </p>
+
+        <p className="card-place">
+          {place}, {hit.state}
         </p>
 
         <div className="card-tags">

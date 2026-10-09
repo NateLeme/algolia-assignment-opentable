@@ -2,6 +2,7 @@ import { history } from 'instantsearch.js/es/lib/routers';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Configure, InstantSearch, useInstantSearch, useRefinementList } from 'react-instantsearch';
 import { ActiveFilters } from './components/ActiveFilters';
+import { DiscoveryHero } from './components/DiscoveryHero';
 import { DiscoveryRails } from './components/DiscoveryRails';
 import { Filters, MobileFiltersButton } from './components/Filters';
 import { Header } from './components/Header';
@@ -77,6 +78,7 @@ function Main() {
           <MobileFiltersButton onClick={() => setFiltersOpen(true)} />
           <ActiveFilters />
           {widenedNotice && <p className="notice">{widenedNotice}</p>}
+          {isBrowsing && <DiscoveryHero />}
           {isBrowsing && <DiscoveryRails onShowBrand={showBrand} />}
           {isBrowsing && <h2 className="section-title">All restaurants</h2>}
           <Results onShowBrand={showBrand} />

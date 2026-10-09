@@ -19,13 +19,13 @@ export function Header({ location, onChoosePreset, onUseMyLocation }: Props) {
   return (
     <header className="header">
       <div className="header-inner">
-        <a className="brand" href="/">
-          <span className="brand-mark" aria-hidden>●</span> OpenTable <span className="brand-x">× Algolia</span>
+        <a className="brand" href="/" aria-label="OpenTable home">
+          <span className="brand-mark" aria-hidden>●</span>OpenTable
         </a>
 
         <SearchBox
           className="searchbox"
-          placeholder="Restaurant, cuisine or neighborhood: try “ruths chris” or “cheap sushi”"
+          placeholder="Search restaurants, cuisines, neighborhoods"
           queryHook={debouncedSearch}
           autoFocus
         />

@@ -26,6 +26,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-09 | 3: Frontend (UI polish) | To make the demo look like a modern OpenTable product, made the OpenTable wordmark prominent (removed "× Algolia"), shortened the search placeholder, added a "Find your next table" hero with one-tap cuisine chips (exact cuisine filter), slimmed card banners to a cuisine icon and color, and moved rating · price · cuisine right under the name. |
 | 2026-10-09 | 3: Frontend (mobile + sort fixes) | To make the demo work on phones, added a 2-row header, compact horizontal cards and a full-screen Filters sheet; fixed filter panels vanishing on sorts (replicas don't inherit `renderingContent`, now shared with every replica) and made the sort's 50-mile default fall back to any distance with a notice when it finds nothing. |
 | 2026-10-09 | 3: Frontend (browser test) | To make sorting useful, fixed "Top rated"/price sorts returning 1 result: virtual replicas' default relevancy strictness (100%) treated distance as relevance and kept only the nearest band, so set strictness to 0% and auto-apply a 50-mile radius when a sort is picked; confirmed booking events (conversion with queryID) reach Algolia. |
 | 2026-10-08 | 3: Frontend (browser test) | To make chain links accurate, the "N locations" link now filters by the exact brand (a text search let the cuisine rule pull in Morton's Grille) and shows a live count for the current search and filters (`brand` made countable in the index). |
@@ -267,7 +268,7 @@ How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). T
 
 ## 11. Open Questions / TODO
 
-- [ ] **Branding (requested 2026-10-09):** remove "× Algolia" from the header and make the OpenTable brand more prominent, on desktop and mobile.
+- [x] **Branding (requested 2026-10-09, done 2026-10-09):** remove "× Algolia" from the header and make the OpenTable brand more prominent, on desktop and mobile.
 
 ---
 
