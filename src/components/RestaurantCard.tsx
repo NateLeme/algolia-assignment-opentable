@@ -2,7 +2,7 @@ import type { Hit } from 'instantsearch.js';
 import type { SendEventForHits } from 'instantsearch.js/es/lib/utils';
 import { Highlight } from 'react-instantsearch';
 import { useContext } from 'react';
-import { formatDistance, LocationContext } from '../lib/location';
+import { formatDistance, LocationContext, placeName } from '../lib/location';
 import type { Restaurant } from '../types/restaurant';
 
 // No usable photos in the data (Client Q2), so each card gets a banner colored by
@@ -31,8 +31,10 @@ interface Props {
 }
 
 export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = true }: Props) {
-  const showDistance = useContext(LocationContext).source !== 'preset';
-  const distance = showDistance ? formatDistance(hit._rankingInfo?.matchedGeoLocation?.distance) : null;
+  const location = useContext(LocationContext);
+  const distance = formatDistance(hit._rankingInfo?.matchedGeoLocation?.distance);
+  // Badge stays short; the tooltip says where it's measured from.
+  const distanceTitle = location.source === 'preset' ? `From the center of ${placeName(location)}` : 'From your location';
   const region = hit.cuisine_hierarchy.lvl0[0];
   const place = [hit.neighborhood, hit.city].filter(Boolean).join(', ');
 
@@ -46,7 +48,7 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
     <article className="card" onClick={() => sendEvent('click', hit, 'Restaurant Clicked')}>
       <div className="card-banner" style={{ background: REGION_THEME[region] }}>
         <span className="card-monogram" aria-hidden>{hit.name.charAt(0)}</span>
-        {distance && <span className="card-distance">{distance}</span>}
+        {distance && <span className="card-distance" title={distanceTitle}>{distance}</span>}
       </div>
 
       <div className="card-body">

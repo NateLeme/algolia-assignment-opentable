@@ -1,10 +1,13 @@
+import { useContext, useEffect, useRef, useState } from 'react';
 import {
-  ClearRefinements,
   DynamicWidgets,
   HierarchicalMenu,
   RefinementList,
+  useClearRefinements,
   useNumericMenu,
 } from 'react-instantsearch';
+import { DistanceContext, MAX_RADIUS_MI } from '../lib/distance';
+import { LocationContext, placeName } from '../lib/location';
 import { PRICE_LABELS } from '../lib/labels';
 
 // Widget options that are functions must be defined once, outside components:
@@ -51,15 +54,71 @@ function RatingFilter() {
   );
 }
 
+// Slider positions 1…150 = miles; one extra position at the end = any distance.
+const ANY_POSITION = MAX_RADIUS_MI + 1;
+// Search only once the slider stops moving, not on every pixel of a drag.
+const SLIDER_COMMIT_MS = 300;
+
+function DistanceFilter() {
+  const { radiusMi, setRadiusMi } = useContext(DistanceContext);
+  const place = placeName(useContext(LocationContext));
+  const [position, setPosition] = useState(radiusMi ?? ANY_POSITION);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => setPosition(radiusMi ?? ANY_POSITION), [radiusMi]); // e.g. after "Clear all"
+
+  const onSlide = (value: number) => {
+    setPosition(value);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setRadiusMi(value >= ANY_POSITION ? null : value), SLIDER_COMMIT_MS);
+  };
+
+  return (
+    <Panel title="Distance">
+      <div className="distance">
+        <span className="distance-value">{position >= ANY_POSITION ? 'Any distance' : `Within ${position} ${position === 1 ? 'mile' : 'miles'} of ${place}`}</span>
+        <input
+          type="range"
+          className="distance-slider"
+          min={1}
+          max={ANY_POSITION}
+          value={position}
+          onChange={(e) => onSlide(Number(e.target.value))}
+          aria-label="Maximum distance in miles"
+          aria-valuetext={position >= ANY_POSITION ? 'Any distance' : `${position} miles`}
+        />
+        <div className="distance-scale muted"><span>1 mile</span><span>{MAX_RADIUS_MI} miles</span><span>Any</span></div>
+      </div>
+    </Panel>
+  );
+}
+
+/** Clears Algolia refinements and the distance limit (which isn't an Algolia refinement). */
+function ClearAll() {
+  const { refine, canRefine } = useClearRefinements();
+  const { radiusMi, setRadiusMi } = useContext(DistanceContext);
+  const enabled = canRefine || radiusMi !== null;
+  return (
+    <button
+      className={`clear-all ${enabled ? '' : 'is-disabled'}`}
+      disabled={!enabled}
+      onClick={() => { refine(); setRadiusMi(null); }}
+    >
+      Clear all
+    </button>
+  );
+}
+
 export function Filters() {
   return (
     <aside className="filters">
       <div className="filters-head">
         <h3>Filters</h3>
-        <ClearRefinements translations={{ resetButtonText: 'Clear all' }} />
+        <ClearAll />
       </div>
 
       <RatingFilter />
+      <DistanceFilter />
 
       {/* Order of these panels comes from the index's facetOrdering (renderingContent),
           so it can be changed from the Algolia dashboard without a deploy. */}

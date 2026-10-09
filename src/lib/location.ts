@@ -42,16 +42,21 @@ export function useUserLocation() {
   return { location, choosePreset, requestBrowserLocation };
 }
 
-/** Meters → "0.4 mi" / "12 mi". */
+/** Meters → "0.4 miles" / "12 miles" (singular for exactly 1). */
 export function formatDistance(meters: number | undefined) {
   if (meters === undefined) return null;
   const miles = meters / 1609.34;
-  return miles < 10 ? `${miles.toFixed(1)} mi` : `${Math.round(miles)} mi`;
+  const value = miles < 10 ? miles.toFixed(1) : String(Math.round(miles));
+  return `${value} ${value === '1.0' ? 'mile' : 'miles'}`;
 }
 
 /**
  * The active search location, shared with cards and discovery rows.
- * Cards show distance only for the user's own location (browser or IP estimate):
- * distance from a metro's center point isn't meaningful.
+ * With a metro picked, distances are measured from the metro's center point;
+ * cards explain that in a tooltip and the slider names the place.
  */
 export const LocationContext = createContext<UserLocation>(IP_FALLBACK);
+
+/** Short name for labels: "New York / Tri-State Area" → "New York", "Dallas - Fort Worth" → "Dallas". */
+export const placeName = (location: UserLocation) =>
+  location.source === 'preset' ? location.label.split(/ \/ | - /)[0] : 'you';

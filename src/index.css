@@ -73,6 +73,9 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
 }
 .ais-SearchBox-input:focus { border-color: var(--accent); background: var(--surface); }
 .ais-SearchBox-submit, .ais-SearchBox-loadingIndicator { display: none; }
+/* Chrome/Safari add their own clear button to search inputs; keep only InstantSearch's. */
+.ais-SearchBox-input::-webkit-search-cancel-button,
+.ais-SearchBox-input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
 .ais-SearchBox-reset {
   position: absolute; right: 12px; border: 0; background: none; color: var(--muted); padding: 4px;
 }
@@ -115,10 +118,13 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
 .filters-head h3 { font-size: 18px; }
 .panel-title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 8px; }
 
-.ais-ClearRefinements-button {
-  border: 0; background: none; color: var(--accent); font-weight: 600; padding: 0;
-}
-.ais-ClearRefinements-button--disabled { color: var(--muted); opacity: 0.5; cursor: default; }
+.clear-all { border: 0; background: none; color: var(--accent); font-weight: 600; padding: 0; }
+.clear-all.is-disabled { color: var(--muted); opacity: 0.5; cursor: default; }
+
+.distance { display: flex; flex-direction: column; gap: 6px; }
+.distance-value { font-weight: 600; font-size: 14px; }
+.distance-slider { width: 100%; accent-color: var(--accent); }
+.distance-scale { display: flex; justify-content: space-between; font-size: 12px; }
 
 .ais-RefinementList-list, .ais-HierarchicalMenu-list { list-style: none; margin: 0; padding: 0; }
 .ais-HierarchicalMenu-list--child { padding-left: 14px; }
@@ -154,7 +160,8 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
   border: 1.5px solid var(--border); border-radius: 999px; padding: 8px 12px;
   background: var(--surface); color: var(--text); font: inherit;
 }
-.ais-CurrentRefinements-list { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.active-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; align-items: center; }
+.ais-CurrentRefinements-list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .ais-CurrentRefinements-item { display: flex; gap: 6px; align-items: center; }
 .ais-CurrentRefinements-label { display: none; }
 .ais-CurrentRefinements-category {

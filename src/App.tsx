@@ -1,10 +1,12 @@
 import { history } from 'instantsearch.js/es/lib/routers';
+import { useState } from 'react';
 import { Configure, InstantSearch, useInstantSearch, useSearchBox } from 'react-instantsearch';
 import { DiscoveryRails } from './components/DiscoveryRails';
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 import { Results } from './components/Results';
 import { AROUND_PRECISION, INDEX, searchClient } from './lib/algolia';
+import { DistanceContext, milesToMeters } from './lib/distance';
 import { LocationContext, useUserLocation } from './lib/location';
 
 /** Empty search box and no filters → discovery page; otherwise → results. */
@@ -31,6 +33,7 @@ function Main() {
 
 export default function App() {
   const { location, choosePreset, requestBrowserLocation } = useUserLocation();
+  const [radiusMi, setRadiusMi] = useState<number | null>(null);
 
   return (
     <InstantSearch
@@ -45,13 +48,16 @@ export default function App() {
       <Configure
         hitsPerPage={12}
         getRankingInfo // returns distance per hit, shown on cards
-        aroundRadius="all" // rank by distance, never exclude far-away matches
+        // Distance slider: limit to N miles, or "all" = rank by distance but never exclude.
+        aroundRadius={radiusMi ? milesToMeters(radiusMi) : 'all'}
         aroundPrecision={AROUND_PRECISION}
         {...(location.latLng ? { aroundLatLng: location.latLng } : { aroundLatLngViaIP: true })}
       />
       <Header location={location} onChoosePreset={choosePreset} onUseMyLocation={requestBrowserLocation} />
       <LocationContext.Provider value={location}>
-        <Main />
+        <DistanceContext.Provider value={{ radiusMi, setRadiusMi }}>
+          <Main />
+        </DistanceContext.Provider>
       </LocationContext.Provider>
     </InstantSearch>
   );

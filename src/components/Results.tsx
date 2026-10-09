@@ -1,4 +1,5 @@
 import type { Hit } from 'instantsearch.js';
+import { useContext } from 'react';
 import {
   CurrentRefinements,
   SortBy,
@@ -8,6 +9,7 @@ import {
   useSearchBox,
 } from 'react-instantsearch';
 import { SORT_OPTIONS } from '../lib/algolia';
+import { DistanceContext } from '../lib/distance';
 import { PRICE_LABELS } from '../lib/labels';
 import type { Restaurant } from '../types/restaurant';
 import { RestaurantCard } from './RestaurantCard';
@@ -33,11 +35,18 @@ const SUGGESTED_SEARCHES = ['Italian', 'Sushi', 'Steakhouse', 'Seafood', 'Cheap 
 function NoResults() {
   const { indexUiState, setIndexUiState } = useInstantSearch();
   const { refine } = useSearchBox();
+  const { radiusMi, setRadiusMi } = useContext(DistanceContext);
   const hasFilters = Object.keys(indexUiState).some((k) => !['query', 'configure', 'sortBy', 'page'].includes(k));
+  const title = indexUiState.query
+    ? `No restaurants match "${indexUiState.query}"${radiusMi ? ` within ${radiusMi} miles` : ''}`
+    : `No restaurants within ${radiusMi} miles`;
 
   return (
     <div className="empty">
-      <h3>No restaurants match "{indexUiState.query}"</h3>
+      <h3>{title}</h3>
+      {radiusMi && (
+        <button className="btn-primary" onClick={() => setRadiusMi(null)}>Show any distance</button>
+      )}
       {hasFilters ? (
         <button className="btn-primary" onClick={() => setIndexUiState((s) => ({ query: s.query, configure: s.configure }))}>
           Search without filters
@@ -58,6 +67,7 @@ export function Results() {
   const { items, sendEvent, showMore, isLastPage } = useInfiniteHits<Hit<Restaurant>>();
   const { results } = useInstantSearch();
   const { refine } = useSearchBox();
+  const { radiusMi, setRadiusMi } = useContext(DistanceContext);
   const allSameBrand = items.length > 0 && !!items[0].brand && items.every((h) => h.brand === items[0].brand);
 
   return (
@@ -66,7 +76,15 @@ export function Results() {
         <Stats translations={STATS_TRANSLATIONS} />
         <SortBy items={SORT_OPTIONS} />
       </div>
-      <CurrentRefinements transformItems={formatRefinementChips} />
+      <div className="active-filters">
+        {radiusMi && (
+          <span className="ais-CurrentRefinements-category">
+            ≤ {radiusMi} {radiusMi === 1 ? 'mile' : 'miles'}
+            <button className="ais-CurrentRefinements-delete" aria-label="Remove distance limit" onClick={() => setRadiusMi(null)}>✕</button>
+          </span>
+        )}
+        <CurrentRefinements transformItems={formatRefinementChips} />
+      </div>
 
       {results.nbHits === 0 && results.__isArtificial !== true ? (
         <NoResults />
