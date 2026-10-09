@@ -1,8 +1,9 @@
 import { useSyncExternalStore } from 'react';
 
-// Saved restaurants (♡ on cards). Kept in this browser only: a demo convenience, not an
-// account feature. Saving also sends an Algolia conversion event (see RestaurantCard),
-// a preference signal Personalization can learn from.
+// Favorite restaurants (♡ on cards; shown as "Favorites" in the UI). Kept in this
+// browser only: a demo convenience, not an account feature. Favoriting also sends an
+// Algolia conversion event (see RestaurantCard), a preference signal Personalization
+// can learn from.
 const STORAGE_KEY = 'saved-restaurants';
 
 function read(): Set<string> {

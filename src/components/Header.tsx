@@ -19,7 +19,7 @@ interface Props {
   onUseMyLocation: () => void;
 }
 
-/** Opens the Saved view: only saved restaurants, any distance, no other filters. */
+/** Opens Favorites: only favorited restaurants, any distance, no other filters. */
 function SavedButton() {
   const count = useSaved().size;
   const { collection, setCollection } = useContext(CollectionContext);
@@ -38,11 +38,11 @@ function SavedButton() {
     <button
       className={`saved-button ${active ? 'is-active' : ''}`}
       onClick={active ? () => setCollection(null) : open}
-      aria-label={`Saved restaurants: ${count}`}
+      aria-label={`Favorites: ${count}`}
       aria-pressed={active}
     >
       <span aria-hidden>{count > 0 ? '♥' : '♡'}</span>
-      <span className="saved-label">Saved</span>
+      <span className="saved-label">Favorites</span>
       {count > 0 && <span className="saved-count">{count}</span>}
     </button>
   );

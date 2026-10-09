@@ -29,8 +29,8 @@ function NoResults() {
   if (collection?.id === SAVED.id && !indexUiState.query) {
     return (
       <div className="empty">
-        <h3>No saved restaurants yet</h3>
-        <p className="muted">Tap ♡ on any restaurant to save it here.</p>
+        <h3>No favorites yet</h3>
+        <p className="muted">Tap ♡ on any restaurant to add it to your favorites.</p>
       </div>
     );
   }

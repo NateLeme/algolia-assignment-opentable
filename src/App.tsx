@@ -133,7 +133,7 @@ export default function App() {
         // Distance slider: limit to N miles, or "all" = rank by distance but never exclude.
         aroundRadius={radiusMi ? milesToMeters(radiusMi) : 'all'}
         aroundPrecision={AROUND_PRECISION}
-        filters={collectionFilters} // "See all" collection or Saved (exact filter), if any
+        filters={collectionFilters} // "View all" collection or Favorites (exact filter), if any
         {...(location.latLng ? { aroundLatLng: location.latLng } : { aroundLatLngViaIP: true })}
       />
       <LocationContext.Provider value={location}>

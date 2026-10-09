@@ -19,6 +19,7 @@ const FETCHED_PER_RAIL = 16;
 
 interface RailHitsProps {
   collection: Collection;
+  title: string;
   onSeeAll: (collection: Collection) => void;
   railIndex: number;
   visibleIds: Set<string> | undefined;
@@ -26,18 +27,29 @@ interface RailHitsProps {
   onShowBrand: (brand: string) => void;
 }
 
-function RailHits({ collection, onSeeAll, railIndex, visibleIds, onIds, onShowBrand }: RailHitsProps) {
+function RailHits({ collection, title, onSeeAll, railIndex, visibleIds, onIds, onShowBrand }: RailHitsProps) {
   const { items, results, sendEvent } = useHits<Hit<Restaurant>>();
   const trackRef = useRef<HTMLDivElement>(null);
+  // Which directions can still scroll: arrows gray out at either end.
+  const [canScroll, setCanScroll] = useState({ left: false, right: false });
 
   // Report what this rail received, so the parent can de-duplicate across rails.
   const ids = items.map((h) => h.objectID).join(',');
   useEffect(() => onIds(railIndex, ids ? ids.split(',') : []), [railIndex, ids, onIds]);
 
   const shown = visibleIds ? items.filter((h) => visibleIds.has(h.objectID)) : items.slice(0, SHOWN_PER_RAIL);
-  // First load: placeholders instead of an empty row.
-  if (!results || results.__isArtificial) return <div className="rail-track"><SkeletonCards count={4} /></div>;
-  if (!shown.length) return <p className="muted">Nothing nearby yet. Try another city.</p>;
+  const loading = !results || results.__isArtificial;
+
+  const updateArrows = useCallback(() => {
+    const t = trackRef.current;
+    if (!t) return;
+    setCanScroll({ left: t.scrollLeft > 4, right: t.scrollLeft + t.clientWidth < t.scrollWidth - 4 });
+  }, []);
+  useEffect(() => {
+    updateArrows();
+    window.addEventListener('resize', updateArrows);
+    return () => window.removeEventListener('resize', updateArrows);
+  }, [updateArrows, shown.length, loading]);
 
   const scroll = (direction: 1 | -1) => {
     const track = trackRef.current;
@@ -45,20 +57,33 @@ function RailHits({ collection, onSeeAll, railIndex, visibleIds, onIds, onShowBr
   };
 
   return (
-    <div className="rail-body">
-      <button className="rail-arrow rail-arrow-left" aria-label="Scroll left" onClick={() => scroll(-1)}>‹</button>
-      <div className="rail-track" ref={trackRef}>
-        {shown.map((hit, i) => (
-          <RestaurantCard key={hit.objectID} hit={hit} position={i} sendEvent={sendEvent} onShowBrand={onShowBrand} />
-        ))}
-        {/* End of the row: open the full results with this row's exact filter. */}
-        <button className="see-all-tile" onClick={() => onSeeAll(collection)}>
-          <span className="see-all-count">See all {results?.nbHits.toLocaleString()}</span>
-          <span className="see-all-title">{collection.title} →</span>
-        </button>
-      </div>
-      <button className="rail-arrow rail-arrow-right" aria-label="Scroll right" onClick={() => scroll(1)}>›</button>
-    </div>
+    <>
+      <header className="rail-head">
+        <h2>{title}</h2>
+        {collection.subtitle && <p className="muted">{collection.subtitle}</p>}
+        {/* Opens the full results with this row's exact filter. */}
+        {!loading && shown.length > 0 && (
+          <button className="rail-view-all" onClick={() => onSeeAll(collection)}>
+            View all ({results.nbHits.toLocaleString()}) →
+          </button>
+        )}
+      </header>
+      {loading ? (
+        <div className="rail-track"><SkeletonCards count={4} /></div>
+      ) : !shown.length ? (
+        <p className="muted">Nothing nearby yet. Try another city.</p>
+      ) : (
+        <div className="rail-body">
+          <button className="rail-arrow rail-arrow-left" aria-label="Scroll left" disabled={!canScroll.left} onClick={() => scroll(-1)}>‹</button>
+          <div className="rail-track" ref={trackRef} onScroll={updateArrows}>
+            {shown.map((hit, i) => (
+              <RestaurantCard key={hit.objectID} hit={hit} position={i} sendEvent={sendEvent} onShowBrand={onShowBrand} />
+            ))}
+          </div>
+          <button className="rail-arrow rail-arrow-right" aria-label="Scroll right" disabled={!canScroll.right} onClick={() => scroll(1)}>›</button>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -97,13 +122,9 @@ export function DiscoveryRails({ onShowBrand, onSeeAll }: Props) {
     <div className="rails">
       {COLLECTIONS.map((rail, i) => (
         <section key={rail.id} className="rail">
-          <header className="rail-head">
-            <h2>{rail.nearTitle ? `${rail.title} ${where}` : rail.title}</h2>
-            {rail.subtitle && <p className="muted">{rail.subtitle}</p>}
-          </header>
           <Index indexName={INDEX} indexId={`rail-${rail.id}`}>
             <Configure filters={rail.filters} hitsPerPage={FETCHED_PER_RAIL} />
-            <RailHits collection={rail} onSeeAll={onSeeAll} railIndex={i} visibleIds={visible[i]} onIds={onIds} onShowBrand={onShowBrand} />
+            <RailHits collection={rail} title={rail.nearTitle ? `${rail.title} ${where}` : rail.title} onSeeAll={onSeeAll} railIndex={i} visibleIds={visible[i]} onIds={onIds} onShowBrand={onShowBrand} />
           </Index>
         </section>
       ))}

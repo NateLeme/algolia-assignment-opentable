@@ -40,8 +40,8 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
   const isSaved = useSaved().has(hit.objectID);
 
   const save = () => {
-    // Saving is a preference signal: send it as a conversion for Personalization.
-    if (toggleSaved(hit.objectID)) sendEvent('conversion', hit, 'Restaurant Saved');
+    // Favoriting is a preference signal: send it as a conversion for Personalization.
+    if (toggleSaved(hit.objectID)) sendEvent('conversion', hit, 'Restaurant Favorited');
   };
 
   const book = () => {
@@ -68,7 +68,7 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
         {badge && <span className={`card-badge badge-${badge.tone}`}>{badge.label}</span>}
         <button
           className={`card-save ${isSaved ? 'is-saved' : ''}`}
-          aria-label={isSaved ? `Remove ${hit.name} from saved` : `Save ${hit.name}`}
+          aria-label={isSaved ? `Remove ${hit.name} from favorites` : `Add ${hit.name} to favorites`}
           aria-pressed={isSaved}
           onClick={(e) => { e.stopPropagation(); save(); }}
         >

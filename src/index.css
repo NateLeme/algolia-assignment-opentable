@@ -56,7 +56,7 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
   border-bottom: 1px solid var(--border);
 }
 .header-inner {
-  max-width: 1320px; margin: 0 auto; padding: 12px 16px;
+  padding: 12px 24px; /* full width */
   display: flex; gap: 16px; align-items: center;
 }
 .brand {
@@ -132,7 +132,7 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
 
 /* ---------- Layout ---------- */
 .layout {
-  max-width: 1320px; margin: 0 auto; padding: 24px 16px 64px;
+  padding: 24px 24px 64px; /* full width */
   display: grid; grid-template-columns: 260px 1fr; gap: 32px;
 }
 .content { min-width: 0; }
@@ -306,21 +306,19 @@ button { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s
 }
 .rail-track::-webkit-scrollbar { display: none; } /* Chrome, Safari */
 .rail-track .card { scroll-snap-align: start; }
-.see-all-tile {
-  scroll-snap-align: start; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;
-  border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface);
-  color: var(--text); padding: 16px; text-align: center;
+.rail-view-all {
+  margin-left: auto; border: 0; background: none; padding: 0; white-space: nowrap;
+  color: var(--accent); font-weight: 600; font-size: var(--text-small);
 }
-.see-all-tile:hover { border-color: var(--accent); background: var(--accent-soft); }
-.see-all-count { font-size: var(--text-h2); font-weight: 800; color: var(--accent); }
-.see-all-title { font-weight: 600; }
+.rail-view-all:hover { text-decoration: underline; }
 .rail-arrow {
   display: none; position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
   width: 36px; height: 36px; border-radius: var(--radius-pill); border: 1px solid var(--border);
   background: var(--surface); color: var(--text); font-size: 22px; line-height: 1;
   box-shadow: var(--shadow);
 }
-.rail-arrow:hover { border-color: var(--accent); color: var(--accent); }
+.rail-arrow:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.rail-arrow:disabled { color: var(--border); background: var(--surface-2); box-shadow: none; cursor: default; }
 .rail-arrow-left { left: -14px; }
 .rail-arrow-right { right: -14px; }
 /* Arrows only where there's a mouse; touch devices swipe. */
@@ -352,7 +350,7 @@ button { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s
   .location-input { width: 100%; min-width: 0; padding: 8px 0; font-size: 14px; }
   .location-list { width: min(300px, calc(100vw - 32px)); }
 
-  .layout { grid-template-columns: 1fr; gap: 0; padding-top: 12px; }
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 12px 16px 48px; }
   .rail-track { grid-auto-columns: 85%; }
   .hero { margin-bottom: 20px; }
   .hero h1 { font-size: 24px; }
