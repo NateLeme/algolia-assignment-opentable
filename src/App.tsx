@@ -128,7 +128,6 @@ export default function App() {
       future={{ preserveSharedStateOnUnmount: true }}
     >
       <Configure
-        hitsPerPage={12}
         getRankingInfo // returns distance per hit, shown on cards
         // Distance slider: limit to N miles, or "all" = rank by distance but never exclude.
         aroundRadius={radiusMi ? milesToMeters(radiusMi) : 'all'}

@@ -63,9 +63,16 @@ function RailHits({ collection, title, onSeeAll, railIndex, visibleIds, onIds, o
         {collection.subtitle && <p className="muted">{collection.subtitle}</p>}
         {/* Opens the full results with this row's exact filter. */}
         {!loading && shown.length > 0 && (
-          <button className="rail-view-all" onClick={() => onSeeAll(collection)}>
-            View all ({results.nbHits.toLocaleString()}) →
-          </button>
+          <>
+            <button className="rail-view-all" onClick={() => onSeeAll(collection)}>
+              View all ({results.nbHits.toLocaleString()}) →
+            </button>
+            {/* In the header, not over the cards. Gray when that end is reached. */}
+            <span className="rail-arrows">
+              <button className="rail-arrow" aria-label="Scroll left" disabled={!canScroll.left} onClick={() => scroll(-1)}>‹</button>
+              <button className="rail-arrow" aria-label="Scroll right" disabled={!canScroll.right} onClick={() => scroll(1)}>›</button>
+            </span>
+          </>
         )}
       </header>
       {loading ? (
@@ -74,13 +81,11 @@ function RailHits({ collection, title, onSeeAll, railIndex, visibleIds, onIds, o
         <p className="muted">Nothing nearby yet. Try another city.</p>
       ) : (
         <div className="rail-body">
-          <button className="rail-arrow rail-arrow-left" aria-label="Scroll left" disabled={!canScroll.left} onClick={() => scroll(-1)}>‹</button>
           <div className="rail-track" ref={trackRef} onScroll={updateArrows}>
             {shown.map((hit, i) => (
               <RestaurantCard key={hit.objectID} hit={hit} position={i} sendEvent={sendEvent} onShowBrand={onShowBrand} />
             ))}
           </div>
-          <button className="rail-arrow rail-arrow-right" aria-label="Scroll right" disabled={!canScroll.right} onClick={() => scroll(1)}>›</button>
         </div>
       )}
     </>

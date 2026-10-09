@@ -17,6 +17,13 @@
   --radius-sm: 4px;    /* inputs in panels, dropdowns, notices */
   --radius-pill: 6px;  /* search bar, buttons, chips, tags, badges */
   --text-h1: 30px;
+  /* Discovery hero: soft mesh of brand red, peach and lavender over a warm off-white. */
+  --hero-bg:
+    radial-gradient(60% 150% at 100% 0%, rgb(218 55 67 / 0.30), transparent 62%),
+    radial-gradient(40% 120% at 85% 100%, rgb(235 70 90 / 0.20), transparent 60%),
+    radial-gradient(45% 130% at 60% 100%, rgb(255 150 110 / 0.20), transparent 62%),
+    radial-gradient(35% 110% at 35% -10%, rgb(160 130 255 / 0.10), transparent 60%),
+    linear-gradient(120deg, #fff8f6, #fce9eb);
   --text-h2: 20px;
   --text-small: 13px;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.06);
@@ -30,6 +37,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --hero-bg:
+      radial-gradient(60% 150% at 100% 0%, rgb(218 55 67 / 0.34), transparent 62%),
+      radial-gradient(40% 120% at 85% 100%, rgb(235 70 90 / 0.18), transparent 60%),
+      radial-gradient(45% 130% at 72% 100%, rgb(255 140 90 / 0.12), transparent 62%),
+      radial-gradient(40% 120% at 42% -10%, rgb(140 110 255 / 0.12), transparent 60%),
+      linear-gradient(120deg, #1d1a1a, #1f1718);
     --bg: #121212;
     --surface: #1c1c1c;
     --surface-2: #262626;
@@ -56,17 +69,21 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
   border-bottom: 1px solid var(--border);
 }
 .header-inner {
+  /* Same columns as the page below: logo centered over the filter sidebar, search
+     starting where the content starts. */
+  display: grid; grid-template-columns: 260px minmax(0, 1fr); column-gap: 32px; align-items: center;
   padding: 12px 24px; /* full width */
-  display: flex; gap: 16px; align-items: center;
 }
+.header-inner .brand { justify-self: end; } /* right edge = filter column's right edge */
+.header-main { display: flex; align-items: center; min-width: 0; } /* no gap: actions center exactly in the space after search */
 .brand {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-weight: 800; font-size: 24px; letter-spacing: -0.02em;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-weight: 800; font-size: 27px; letter-spacing: -0.02em;
   color: var(--accent); text-decoration: none; white-space: nowrap;
 }
-.brand-mark { font-size: 18px; }
+.brand-mark { font-size: 20px; }
 
-.searchbox { flex: 1; }
+.searchbox { flex: 1; min-width: 0; }
 .ais-SearchBox-form { display: flex; align-items: center; position: relative; }
 .ais-SearchBox-input {
   width: 100%; padding: 12px 40px 12px 16px; font-size: 16px;
@@ -74,7 +91,7 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
   background: var(--surface-2); color: var(--text); outline: none;
 }
 .ais-SearchBox-input:focus { border-color: var(--accent); background: var(--surface); }
-.searchbox { max-width: 720px; margin: 0 auto; }
+.searchbox { max-width: 720px; } /* sits right after the logo */
 .searchbox .ais-SearchBox-input {
   padding: 14px 44px 14px 48px; font-size: 17px; border-width: 2px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
@@ -95,6 +112,7 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
 }
 .ais-SearchBox-reset svg { width: 10px; height: 10px; fill: currentColor; }
 
+.header-actions { flex: 1; display: flex; justify-content: center; align-items: center; gap: 12px; min-width: max-content; }
 .location {
   position: relative; display: flex; align-items: center; gap: 6px;
   border: 1.5px solid var(--border); border-radius: var(--radius-pill); padding: 0 6px 0 12px;
@@ -282,7 +300,12 @@ button { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s
 .btn-link { border: 0; background: none; color: var(--accent); font-weight: 600; padding: 0; font-size: 14px; }
 
 /* ---------- Discovery hero ---------- */
-.hero { margin-bottom: 28px; }
+.hero {
+  /* Sits fully inside the content column, clear of the filter sidebar. */
+  margin: 0 0 28px; padding: 26px 28px 24px;
+  border-radius: var(--radius); background: var(--hero-bg);
+}
+
 .hero h1 { margin: 0 0 4px; font-size: var(--text-h1); letter-spacing: -0.02em; }
 .hero p { margin: 0 0 14px; }
 .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -311,19 +334,16 @@ button { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s
   color: var(--accent); font-weight: 600; font-size: var(--text-small);
 }
 .rail-view-all:hover { text-decoration: underline; }
+.rail-arrows { display: none; gap: 6px; align-self: center; }
 .rail-arrow {
-  display: none; position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
-  width: 36px; height: 36px; border-radius: var(--radius-pill); border: 1px solid var(--border);
-  background: var(--surface); color: var(--text); font-size: 22px; line-height: 1;
-  box-shadow: var(--shadow);
+  width: 30px; height: 30px; border-radius: var(--radius-pill); border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); font-size: 20px; line-height: 1; padding: 0;
 }
 .rail-arrow:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 .rail-arrow:disabled { color: var(--border); background: var(--surface-2); box-shadow: none; cursor: default; }
-.rail-arrow-left { left: -14px; }
-.rail-arrow-right { right: -14px; }
 /* Arrows only where there's a mouse; touch devices swipe. */
 @media (hover: hover) and (pointer: fine) {
-  .rail-body:hover .rail-arrow { display: block; }
+  .rail-arrows { display: inline-flex; }
 }
 
 .notice {
@@ -342,9 +362,12 @@ button { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s
   /* 1. Header: two rows. Logo + compact location on top, full-width search below. */
   /* Row 1: logo · location (takes the remaining width) · saved. Row 2: search. */
   .header-inner { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; padding: 10px 16px; }
+  .header-inner .brand { justify-self: start; }
+  .header-main, .header-actions { display: contents; }
   .saved-button { grid-column: 3; grid-row: 1; padding: 8px 10px; }
   .saved-label { display: none; }
-  .brand { font-size: 20px; align-self: center; }
+  .brand { font-size: 20px; gap: 6px; align-self: center; }
+  .brand-mark { font-size: 14px; }
   .searchbox { grid-column: 1 / -1; grid-row: 2; }
   .location { grid-column: 2; grid-row: 1; padding: 0 2px 0 10px; min-width: 0; }
   .location-input { width: 100%; min-width: 0; padding: 8px 0; font-size: 14px; }
@@ -352,8 +375,10 @@ button { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s
 
   .layout { grid-template-columns: 1fr; gap: 0; padding: 12px 16px 48px; }
   .rail-track { grid-auto-columns: 85%; }
-  .hero { margin-bottom: 20px; }
+  .hero { margin: 0 -16px 20px; padding: 20px 16px; border-radius: 0; } /* edge to edge on phones */
   .hero h1 { font-size: 24px; }
+  .header-inner .location { margin-left: 0; }
+  .rail-head p { display: none; } /* keep row titles on one line */
 
   /* 3. Filters: full-screen sheet opened by the "Filters" button. */
   .mobile-filters-button {

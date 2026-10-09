@@ -56,15 +56,22 @@ export function Header({ location, onChoosePreset, onUseMyLocation }: Props) {
           <span className="brand-mark" aria-hidden>●</span>OpenTable
         </a>
 
-        <SearchBox
-          className="searchbox"
-          placeholder="Search restaurants, cuisines, neighborhoods"
-          queryHook={debouncedSearch}
-          autoFocus
-        />
-
-        <LocationPicker location={location} onChoosePreset={onChoosePreset} onUseMyLocation={onUseMyLocation} />
-        <SavedButton />
+        {/* Desktop: lines up with the content column below (search starts where the page
+            content starts). Phones: "display: contents" lets the items join the phone grid. */}
+        <div className="header-main">
+          <SearchBox
+            className="searchbox"
+            placeholder="Search restaurants, cuisines, neighborhoods"
+            queryHook={debouncedSearch}
+            autoFocus
+          />
+  
+          {/* Centered in the space to the right of the search bar (phones: joins the grid). */}
+          <div className="header-actions">
+            <LocationPicker location={location} onChoosePreset={onChoosePreset} onUseMyLocation={onUseMyLocation} />
+            <SavedButton />
+          </div>
+        </div>
       </div>
     </header>
   );

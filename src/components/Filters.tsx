@@ -35,9 +35,12 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
+// Filters on the stars shown on cards (stars_count), not the review-weighted
+// rating_score: that one decides ranking order, but a "4.0 and up" filter must match
+// the number the diner sees (weighted, a 3.0★ with 3 reviews scored 4.2 and passed).
 function RatingFilter() {
   const { items, refine } = useNumericMenu({
-    attribute: 'rating_score',
+    attribute: 'stars_count',
     items: RATING_ITEMS,
   });
   return (

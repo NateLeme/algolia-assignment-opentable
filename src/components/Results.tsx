@@ -1,6 +1,7 @@
 import type { Hit } from 'instantsearch.js';
-import { useContext } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import {
+  Configure,
   SortBy,
   Stats,
   useInfiniteHits,
@@ -19,6 +20,37 @@ const STATS_TRANSLATIONS = {
   rootElementText: ({ nbHits, processingTimeMS }: { nbHits: number; processingTimeMS: number }) =>
     `${nbHits.toLocaleString()} ${nbHits === 1 ? 'restaurant' : 'restaurants'} · ${processingTimeMS} ms`,
 };
+// Page size that fills complete rows: the grid fits as many 260px columns as the
+// width allows (see .grid in index.css), and 12 doesn't divide 5 columns evenly.
+const TARGET_PER_PAGE = 12;
+const pageSizeFor = (columns: number) => columns * Math.ceil(TARGET_PER_PAGE / columns);
+
+/**
+ * Reads how many columns the results grid actually has (from the browser's layout, so
+ * scrollbars and padding are accounted for) and keeps it updated as the size changes.
+ */
+function useGridColumns() {
+  const ref = useRef<HTMLElement>(null);
+  const [columns, setColumns] = useState(4);
+  const measure = () => {
+    const grid = ref.current?.querySelector('.grid');
+    if (grid) setColumns(getComputedStyle(grid).gridTemplateColumns.split(' ').length);
+  };
+  useEffect(measure); // after every render (no-op when unchanged)
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+  return { ref, columns };
+}
+
 const SUGGESTED_SEARCHES = ['Italian', 'Sushi', 'Steakhouse', 'Seafood', 'Cheap Mexican', 'Brunch'];
 
 function NoResults() {
@@ -64,10 +96,13 @@ function NoResults() {
 export function Results({ onShowBrand }: { onShowBrand: (brand: string) => void }) {
   const { items, sendEvent, showMore, isLastPage } = useInfiniteHits<Hit<Restaurant>>();
   const { results } = useInstantSearch();
+  const { ref: gridRef, columns } = useGridColumns();
   const allSameBrand = items.length > 0 && !!items[0].brand && items.every((h) => h.brand === items[0].brand);
 
   return (
-    <section className="results">
+    <section className="results" ref={gridRef}>
+      {/* Only changes when the column count changes (e.g. resizing the window). */}
+      <Configure hitsPerPage={pageSizeFor(columns)} />
       <div className="toolbar">
         {/* Hide "0 restaurants · 0 ms" while the first results are still loading. */}
         {results.__isArtificial ? <span className="ais-Stats-text">Finding restaurants…</span> : <Stats translations={STATS_TRANSLATIONS} />}
