@@ -8,6 +8,7 @@ import {
   useSearchBox,
 } from 'react-instantsearch';
 import { SORT_OPTIONS } from '../lib/algolia';
+import { CollectionContext, SAVED } from '../lib/collections';
 import { DistanceContext } from '../lib/distance';
 import type { Restaurant } from '../types/restaurant';
 import { RestaurantCard } from './RestaurantCard';
@@ -16,7 +17,7 @@ import { SkeletonCards } from './SkeletonCard';
 // Defined outside components so their identity is stable across renders (see Filters.tsx).
 const STATS_TRANSLATIONS = {
   rootElementText: ({ nbHits, processingTimeMS }: { nbHits: number; processingTimeMS: number }) =>
-    `${nbHits.toLocaleString()} restaurants · ${processingTimeMS} ms`,
+    `${nbHits.toLocaleString()} ${nbHits === 1 ? 'restaurant' : 'restaurants'} · ${processingTimeMS} ms`,
 };
 const SUGGESTED_SEARCHES = ['Italian', 'Sushi', 'Steakhouse', 'Seafood', 'Cheap Mexican', 'Brunch'];
 
@@ -24,6 +25,15 @@ function NoResults() {
   const { indexUiState, setIndexUiState } = useInstantSearch();
   const { refine } = useSearchBox();
   const { radiusMi, setRadiusMi } = useContext(DistanceContext);
+  const { collection } = useContext(CollectionContext);
+  if (collection?.id === SAVED.id && !indexUiState.query) {
+    return (
+      <div className="empty">
+        <h3>No saved restaurants yet</h3>
+        <p className="muted">Tap ♡ on any restaurant to save it here.</p>
+      </div>
+    );
+  }
   const hasFilters = Object.keys(indexUiState).some((k) => !['query', 'configure', 'sortBy', 'page'].includes(k));
   const title = indexUiState.query
     ? `No restaurants match "${indexUiState.query}"${radiusMi ? ` within ${radiusMi} miles` : ''}`

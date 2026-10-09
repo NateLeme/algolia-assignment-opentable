@@ -27,3 +27,11 @@ export const CollectionContext = createContext<{
   collection: Collection | null;
   setCollection: (collection: Collection | null) => void;
 }>({ collection: null, setCollection: () => {} });
+
+// "Saved" is a collection built from the diner's saved restaurants (src/lib/saved.ts).
+// Its filter is computed live from the saved IDs, so unsaving updates the view at once.
+export const SAVED: Collection = { id: 'saved', title: 'Saved', filters: '' };
+
+/** Algolia filter for the saved IDs; matches nothing when the list is empty. */
+export const savedFilters = (ids: Set<string>) =>
+  ids.size ? [...ids].map((id) => `objectID:"${id}"`).join(' OR ') : 'objectID:"__none__"';

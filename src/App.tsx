@@ -9,9 +9,10 @@ import { Header } from './components/Header';
 import { Results } from './components/Results';
 import { AROUND_PRECISION, INDEX, searchClient, SORT_OPTIONS } from './lib/algolia';
 import { BrandCountsContext } from './lib/brands';
-import { CollectionContext, type Collection } from './lib/collections';
+import { CollectionContext, SAVED, savedFilters, type Collection } from './lib/collections';
 import { DistanceContext, milesToMeters, SORT_DEFAULT_RADIUS_MI } from './lib/distance';
 import { LocationContext, placeName, useUserLocation } from './lib/location';
+import { useSaved } from './lib/saved';
 
 // Exact brand filter for "N locations", which also returns per-brand counts for the
 // current search and filters (shown in the link label).
@@ -104,6 +105,8 @@ export default function App() {
   const [radiusIsAuto, setRadiusIsAuto] = useState(false);
   const [collection, setCollection] = useState<Collection | null>(null);
   const collectionValue = useMemo(() => ({ collection, setCollection }), [collection]);
+  const saved = useSaved();
+  const collectionFilters = collection?.id === SAVED.id ? savedFilters(saved) : collection?.filters ?? '';
   const distance = useMemo(
     () => ({
       radiusMi,
@@ -130,13 +133,13 @@ export default function App() {
         // Distance slider: limit to N miles, or "all" = rank by distance but never exclude.
         aroundRadius={radiusMi ? milesToMeters(radiusMi) : 'all'}
         aroundPrecision={AROUND_PRECISION}
-        filters={collection?.filters ?? ''} // "See all" collection (exact filter), if any
+        filters={collectionFilters} // "See all" collection or Saved (exact filter), if any
         {...(location.latLng ? { aroundLatLng: location.latLng } : { aroundLatLngViaIP: true })}
       />
-      <Header location={location} onChoosePreset={choosePreset} onUseMyLocation={requestBrowserLocation} />
       <LocationContext.Provider value={location}>
         <DistanceContext.Provider value={distance}>
           <CollectionContext.Provider value={collectionValue}>
+            <Header location={location} onChoosePreset={choosePreset} onUseMyLocation={requestBrowserLocation} />
             <Main />
           </CollectionContext.Provider>
         </DistanceContext.Provider>

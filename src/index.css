@@ -118,6 +118,18 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
 .location-count { color: var(--muted); font-size: 12px; }
 .location-empty { padding: 8px 10px; color: var(--muted); font-size: 14px; }
 
+.saved-button {
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  border: 1.5px solid var(--border); border-radius: var(--radius-pill); background: var(--surface-2);
+  color: var(--text); padding: 10px 14px; font-weight: 600; font-size: 14px;
+}
+.saved-button span:first-child { color: var(--accent); font-size: 16px; line-height: 1; }
+.saved-button:hover, .saved-button.is-active { border-color: var(--accent); background: var(--accent-soft); }
+.saved-count {
+  background: var(--accent); color: var(--accent-ink); border-radius: var(--radius-pill);
+  font-size: 12px; padding: 1px 7px; min-width: 20px; text-align: center;
+}
+
 /* ---------- Layout ---------- */
 .layout {
   max-width: 1320px; margin: 0 auto; padding: 24px 16px 64px;
@@ -330,11 +342,14 @@ button { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s
 
 @media (max-width: 860px) {
   /* 1. Header: two rows. Logo + compact location on top, full-width search below. */
-  .header-inner { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 10px 16px; }
+  /* Row 1: logo · location (takes the remaining width) · saved. Row 2: search. */
+  .header-inner { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; padding: 10px 16px; }
+  .saved-button { grid-column: 3; grid-row: 1; padding: 8px 10px; }
+  .saved-label { display: none; }
   .brand { font-size: 20px; align-self: center; }
   .searchbox { grid-column: 1 / -1; grid-row: 2; }
-  .location { grid-column: 2; grid-row: 1; padding: 0 2px 0 10px; }
-  .location-input { width: 120px; padding: 8px 0; font-size: 14px; }
+  .location { grid-column: 2; grid-row: 1; padding: 0 2px 0 10px; min-width: 0; }
+  .location-input { width: 100%; min-width: 0; padding: 8px 0; font-size: 14px; }
   .location-list { width: min(300px, calc(100vw - 32px)); }
 
   .layout { grid-template-columns: 1fr; gap: 0; padding-top: 12px; }
