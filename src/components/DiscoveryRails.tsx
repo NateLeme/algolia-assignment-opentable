@@ -6,6 +6,7 @@ import { COLLECTIONS, type Collection } from '../lib/collections';
 import { LocationContext } from '../lib/location';
 import type { Restaurant } from '../types/restaurant';
 import { RestaurantCard } from './RestaurantCard';
+import { SkeletonCards } from './SkeletonCard';
 
 // Persona 2 (exploring): shown when the search box is empty, instead of a blank page.
 // Each rail is a nested <Index> that inherits the location from the main search and
@@ -34,6 +35,8 @@ function RailHits({ collection, onSeeAll, railIndex, visibleIds, onIds, onShowBr
   useEffect(() => onIds(railIndex, ids ? ids.split(',') : []), [railIndex, ids, onIds]);
 
   const shown = visibleIds ? items.filter((h) => visibleIds.has(h.objectID)) : items.slice(0, SHOWN_PER_RAIL);
+  // First load: placeholders instead of an empty row.
+  if (!results || results.__isArtificial) return <div className="rail-track"><SkeletonCards count={4} /></div>;
   if (!shown.length) return <p className="muted">Nothing nearby yet. Try another city.</p>;
 
   const scroll = (direction: 1 | -1) => {

@@ -11,6 +11,7 @@ import { SORT_OPTIONS } from '../lib/algolia';
 import { DistanceContext } from '../lib/distance';
 import type { Restaurant } from '../types/restaurant';
 import { RestaurantCard } from './RestaurantCard';
+import { SkeletonCards } from './SkeletonCard';
 
 // Defined outside components so their identity is stable across renders (see Filters.tsx).
 const STATS_TRANSLATIONS = {
@@ -58,11 +59,14 @@ export function Results({ onShowBrand }: { onShowBrand: (brand: string) => void 
   return (
     <section className="results">
       <div className="toolbar">
-        <Stats translations={STATS_TRANSLATIONS} />
+        {/* Hide "0 restaurants · 0 ms" while the first results are still loading. */}
+        {results.__isArtificial ? <span className="ais-Stats-text">Finding restaurants…</span> : <Stats translations={STATS_TRANSLATIONS} />}
         <SortBy items={SORT_OPTIONS} />
       </div>
 
-      {results.nbHits === 0 && results.__isArtificial !== true ? (
+      {results.__isArtificial ? (
+        <div className="grid"><SkeletonCards count={6} /></div>
+      ) : results.nbHits === 0 ? (
         <NoResults />
       ) : (
         <>

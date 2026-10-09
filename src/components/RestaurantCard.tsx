@@ -2,10 +2,13 @@ import type { Hit } from 'instantsearch.js';
 import type { SendEventForHits } from 'instantsearch.js/es/lib/utils';
 import { Highlight } from 'react-instantsearch';
 import { useContext } from 'react';
+import { badgeFor } from '../lib/badges';
 import { BrandCountsContext } from '../lib/brands';
 import { cuisineGradient, cuisineIcon } from '../lib/cuisineStyle';
 import { formatDistance, LocationContext, placeName } from '../lib/location';
+import { toggleSaved, useSaved } from '../lib/saved';
 import type { Restaurant } from '../types/restaurant';
+import { StarRating } from './StarRating';
 
 // matchedGeoLocation.distance is the real distance. (geoDistance is the ranking value,
 // rounded to our aroundPrecision bands, so everything past 50 km read "31 mi".)
@@ -29,6 +32,13 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
   const distanceTitle = location.source === 'preset' ? `From the center of ${placeName(location)}` : 'From your location';
   const cuisine = hit.cuisines[0];
   const place = [hit.neighborhood, hit.city].filter(Boolean).join(', ');
+  const badge = badgeFor(hit);
+  const isSaved = useSaved().has(hit.objectID);
+
+  const save = () => {
+    // Saving is a preference signal: send it as a conversion for Personalization.
+    if (toggleSaved(hit.objectID)) sendEvent('conversion', hit, 'Restaurant Saved');
+  };
 
   const book = () => {
     // Conversion event: feeds Analytics, Dynamic Re-Ranking and Personalization.
@@ -41,6 +51,15 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
       <div className="card-banner" style={{ background: cuisineGradient(cuisine) }}>
         <span className="card-icon" aria-hidden>{cuisineIcon(cuisine)}</span>
         {distance && <span className="card-distance" title={distanceTitle}>{distance}</span>}
+        {badge && <span className={`card-badge badge-${badge.tone}`}>{badge.label}</span>}
+        <button
+          className={`card-save ${isSaved ? 'is-saved' : ''}`}
+          aria-label={isSaved ? `Remove ${hit.name} from saved` : `Save ${hit.name}`}
+          aria-pressed={isSaved}
+          onClick={(e) => { e.stopPropagation(); save(); }}
+        >
+          {isSaved ? '♥' : '♡'}
+        </button>
       </div>
 
       <div className="card-body">
@@ -49,8 +68,7 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
         </h3>
 
         <p className="card-meta">
-          <span className="rating" aria-label={`${hit.stars_count} stars`}>★ {hit.stars_count.toFixed(1)}</span>
-          <span className="muted">({hit.reviews_count.toLocaleString()})</span>
+          <StarRating value={hit.stars_count} reviews={hit.reviews_count} />
           <span className="dot">·</span>
           <span>{hit.price_label}</span>
           <span className="dot">·</span>

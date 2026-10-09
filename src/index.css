@@ -71,6 +71,18 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
   background: var(--surface-2); color: var(--text); outline: none;
 }
 .ais-SearchBox-input:focus { border-color: var(--accent); background: var(--surface); }
+.searchbox { max-width: 720px; margin: 0 auto; }
+.searchbox .ais-SearchBox-input {
+  padding: 14px 44px 14px 48px; font-size: 17px; border-width: 2px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.searchbox .ais-SearchBox-input:focus { box-shadow: 0 0 0 4px var(--accent-soft); }
+/* Show InstantSearch's submit button as a magnifier icon inside the field, on the left. */
+.searchbox .ais-SearchBox-submit {
+  display: flex; position: absolute; left: 16px; border: 0; background: none; padding: 0; pointer-events: none;
+}
+.searchbox .ais-SearchBox-submitIcon { width: 16px; height: 16px; fill: var(--muted); }
 .ais-SearchBox-submit, .ais-SearchBox-loadingIndicator { display: none; }
 /* Chrome/Safari add their own clear button to search inputs; keep only InstantSearch's. */
 .ais-SearchBox-input::-webkit-search-cancel-button,
@@ -181,9 +193,13 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
 .card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column;
-  transition: transform 0.15s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  animation: card-in 0.25s ease both;
 }
-.card:hover { transform: translateY(-2px); }
+.card:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgb(0 0 0 / 0.05), 0 12px 28px rgb(0 0 0 / 0.10); }
+@keyframes card-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .card { animation: none; transition: none; } }
+button { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, filter 0.15s ease; }
 .card-banner { height: 56px; position: relative; display: flex; align-items: center; padding: 0 14px; }
 .card-icon { font-size: 28px; line-height: 1; filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.15)); }
 .card-distance {
@@ -197,6 +213,35 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
 .card-place { margin: 0; font-size: 13px; color: var(--muted); }
 .card-meta { margin: 0; font-size: 14px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 .rating { color: var(--star); font-weight: 700; }
+.stars { display: inline-flex; align-items: center; gap: 5px; }
+.stars-track { position: relative; color: var(--border); letter-spacing: 1px; font-size: 13px; line-height: 1; }
+.stars-fill { position: absolute; inset: 0 auto 0 0; overflow: hidden; color: var(--star); white-space: nowrap; }
+.stars-value { font-weight: 700; }
+
+.card-badge {
+  position: absolute; left: 10px; bottom: -10px; z-index: 1;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.02em; padding: 3px 9px; border-radius: 999px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+.badge-gold { background: #fff4d6; color: #8a5a00; }
+.badge-red { background: #fde4e6; color: #a51d2b; }
+.badge-green { background: #dff5e6; color: #1d6b3a; }
+.card-save {
+  position: absolute; right: 10px; bottom: -14px; z-index: 1;
+  width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--surface); color: var(--muted); font-size: 16px; line-height: 1; box-shadow: var(--shadow);
+}
+.card-save:hover { color: var(--accent); border-color: var(--accent); }
+.card-save.is-saved { color: var(--accent); border-color: var(--accent); }
+.card-body { padding-top: 16px; }
+
+.skeleton { animation: none; pointer-events: none; }
+.skeleton-block, .skeleton-line {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%; animation: shimmer 1.2s linear infinite;
+}
+.skeleton-line { height: 12px; border-radius: 6px; margin: 4px 0; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 .dot { color: var(--muted); }
 .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag { font-size: 12px; background: var(--surface-2); border-radius: 999px; padding: 2px 10px; color: var(--muted); }
@@ -325,4 +370,12 @@ mark { background: var(--highlight); color: inherit; border-radius: 3px; padding
   .card-tags { display: none; }
   .card-actions { padding-top: 6px; }
   .card-actions .btn-primary { padding: 6px 14px; font-size: 14px; }
+  .card-body { padding-top: 10px; }
+  /* Narrow left column: ♡ at the top, badge across the bottom, distance hidden behind it. */
+  .card-save { top: 6px; bottom: auto; left: 50%; right: auto; transform: translateX(-50%); width: 28px; height: 28px; font-size: 14px; }
+  .card-badge { left: 4px; right: 4px; bottom: 6px; text-align: center; font-size: 10px; padding: 2px 4px; }
+  .card-badge ~ .card-save { top: 6px; }
+  .card-banner:has(.card-badge) .card-distance { bottom: 30px; }
+  .searchbox { max-width: none; margin: 0; }
+  .searchbox .ais-SearchBox-input { padding: 12px 40px 12px 42px; font-size: 16px; }
 }
