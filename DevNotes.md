@@ -1,6 +1,6 @@
-# DevNotes — Algolia SE Assignment (OpenTable Restaurant Discovery)
+# DevNotes: OpenTable Restaurant Discovery
 
-Working notes for building the demo and preparing for the technical debrief and the mock customer call.
+Working notes for building the demo and presenting it: decisions, data audit, relevance testing and open questions.
 Newest entries go at the top of each section. Each entry is dated.
 
 ---
@@ -14,8 +14,8 @@ Newest entries go at the top of each section. Each entry is dated.
 | Personas | (1) Knows what they want: known-item search · (2) Exploring: discovery and inspiration |
 | Dataset | `restaurants_list.json` (~5,000 records) + `restaurants_info.csv` (`;`-separated), joined on `objectID` |
 | Stack | TypeScript · Node indexing script (`algoliasearch` v5) · React + Vite + React InstantSearch + Autocomplete · Vercel |
-| Repo | https://github.com/NateLeme/algolia-assignment-opentable |
-| Live demo | https://algolia-assignment-opentable.vercel.app/ |
+| Repo | https://github.com/NateLeme/opentable-discovery-app |
+| Live demo | https://opentable-discovery-app.vercel.app/ |
 | Algolia app / index | Free (Build) plan · index `restaurants` |
 
 ---
@@ -30,7 +30,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 | 2026-10-09 | 3: Frontend (polish) | To make discovery cleaner and use screen space, replaced the end-of-row "See all" tile with a discreet "View all (N) →" link per row, grayed out row arrows at either end, renamed Saved to Favorites (event "Restaurant Favorited"), and made the desktop layout full width. |
 | 2026-10-09 | 3: Frontend (Saved page) | To give saved favorites somewhere to live, added a "♥ Saved N" header button that opens the saved restaurants as a collection (Algolia filter built live from the saved objectIDs, so unsaving updates instantly), with an empty state and a compact phone header. |
 | 2026-10-09 | 3: Frontend (modern UI) | To make the experience feel like a modern consumer product, added visual star ratings, data-driven badges (Top rated / Popular / Hidden gem), a save ♡ that sends a "Restaurant Saved" event, loading placeholders, the Inter font, a more prominent search bar, representative cuisine photos (45 free-license images rotating so neighbours differ; the data's image URLs are dead, Client Q2) and squarer corners from three shared radius values. Also fixed Vercel deploys by committing with the NateLeme GitHub email. |
-| 2026-10-09 | 5: Ship (deploy) | To make the demo public safely, created a dedicated search-only public key (restaurants indices only, 2,000 searches per visitor per hour (raised from 1,000 so a shared office network can't run out mid-demo), max 100 hits, locked to the Vercel URL; verified other origins get 403) and deployed to Vercel at https://algolia-assignment-opentable.vercel.app/ with auto-redeploy on push. |
+| 2026-10-09 | 5: Ship (deploy) | To make the demo public safely, created a dedicated search-only public key (restaurants indices only, 2,000 searches per visitor per hour (raised from 1,000 so a shared office network can't run out mid-demo), max 100 hits, locked to the Vercel URL; verified other origins get 403) and deployed to Vercel at https://opentable-discovery-app.vercel.app/ with auto-redeploy on push. |
 | 2026-10-09 | 2: Relevance tuning (round 2) | To test realistic queries and lock in today's bug fixes, expanded the suite to 57 (incl. 7 configuration regression tests); baseline 51/57, then fixed state abbreviations ("steakhouse tx") and "expensive" intent with rules and corrected 4 over-strict tests, now 57/57. |
 | 2026-10-09 | 3: Frontend (UI polish) | To make discovery feel curated and lead somewhere, removed duplicate restaurants across discovery rows, hid row scrollbars behind hover arrows, tidied spacing/type, and added a "See all N" tile per row that opens the full results with the row's exact filter (shown as a chip; Top rated also sorts by rating). |
 | 2026-10-09 | 3: Frontend (UI polish) | To make the demo look like a modern OpenTable product, made the OpenTable wordmark prominent (removed "× Algolia"), shortened the search placeholder, added a "Find your next table" hero with one-tap cuisine chips (exact cuisine filter), slimmed card banners to a cuisine icon and color, and moved rating · price · cuisine right under the name. |
@@ -47,7 +47,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 | 2026-10-08 | 2: Relevance baseline | To measure search quality before tuning, ran the 31-query test suite against the live index (28/31 passed; failures: "steak house" name vs cuisine, "sushi sf" not filtered to the city, "upper east side" ranks 6–10), and added `--only=` to the push script so tuning rounds re-send only what changed. |
 | 2026-10-07 | 3: Frontend (first draft) | To give both personas a modern experience, built a first React InstantSearch UI (instant search, cuisine/price/rating filters, location picker, discovery rows, booking events); written but not yet tested in the browser. |
 | 2026-10-07 | 2: Relevance config | To make search forgiving and intent-aware, wrote the index settings, sort replicas, synonyms and Query Rules as code plus a 31-query relevance test suite; hit the free plan's 3-rule limit, then upgraded to Grow Plus to enable all 5 rules (push still in progress). |
-| 2026-10-07 | 1: Data prep (repo) | To keep the repo clean and reviewable, removed duplicate assignment files, committed the raw data exactly as provided, documented env vars in the README, and merged GitHub's separate initial history so the work is pushed. |
+| 2026-10-07 | 1: Data prep (repo) | To keep the repo clean and reviewable, removed duplicate starter files, committed the raw data exactly as provided, documented env vars in the README, and merged GitHub's separate initial history so the work is pushed. |
 | 2026-10-07 | 1: Data prep (build) | To turn the client files into trustworthy search records, wrote `build-records.ts`: it joins both files, fixes prices/states/ZIPs/phones/neighborhoods, adds a rating weighted by review count and chain detection, and fails on bad data. |
 | 2026-10-07 | 1: Data prep (cuisine) | Because cuisine is the main filter and 114 raw values were messy, mapped them to 70 clean cuisines, 8 regions and 20 tags, checking edge cases against actual restaurant names. |
 | 2026-10-07 | 1: Data prep (audit) | To understand the client's data before changing it, audited both files and sorted every issue into fixes with written assumptions vs. questions for OpenTable (§12). |
@@ -83,7 +83,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 - **Context:** Need a stack for data prep, indexing, and a modern search UI; the role emphasises JS/TS and React/Vue/Angular.
 - **Options considered:** Python vs Node for data prep · reuse provided starter (Parcel 1, Node 9, algoliasearch v4 + helper) vs fresh scaffold · custom backend server vs none.
 - **Decision:** TypeScript end-to-end. Offline Node + TS script joins/cleans data, pushes records, and applies index settings/synonyms/rules from code. Frontend: React + Vite + React InstantSearch (+ Autocomplete, `useGeoSearch` + Leaflet for map). Hosted on Vercel. No runtime backend.
-- **Why:** Algolia is queried directly from the browser with a search-only key, so a server adds latency and moving parts without value. One language across repo; shared record type between script and UI. Settings-as-code makes config reproducible, reviewable, and easy to walk through in the debrief. Official Algolia UI libraries = faster delivery and idiomatic usage.
+- **Why:** Algolia is queried directly from the browser with a search-only key, so a server adds latency and moving parts without value. One language across repo; shared record type between script and UI. Settings-as-code makes config reproducible, reviewable, and easy to walk through in a technical review. Official Algolia UI libraries = faster delivery and idiomatic usage.
 - **Trade-offs / revisit if:** Python/pandas is nicer for exploratory wrangling, but 5k rows doesn't need it. Would add a backend only for secured API keys per user, server-side rendering, or proxying Insights/booking events.
 
 <!-- Template:
@@ -236,7 +236,7 @@ How to reproduce: `npm run test:relevance` (add `-v` for the top 5 per query). T
 | 2026-10-08 | `steak house` | Top 10 Steakhouse | #1 "Steak House No. 316" (cuisine: American) | Correct name match (name is the top-priority attribute); the client data mislabels the cuisine | **Test fix:** accept Steakhouse cuisine *or* "steak" in name. No config change: demoting a correct name match to hide bad data would be wrong (Client Q4) | ✅ |
 | 2026-10-08 | `upper east side` (no location) | Top 10 in NYC Upper East Side | #6 Ni. Do. Caffé, Miami ("MiMo / Upper East Side") | Not a bug: the neighborhood exists in both cities; with no location, equal matches are ordered by rating | **Test fix:** run from Manhattan (realistic) + new test from Miami | ✅ Manhattan: top 10 all NYC · Miami: Ni. Do. Caffé #1 |
 
-**Takeaway for the debrief:** across both rounds, only 3 of 9 failures needed a search change; the rest were client-data labels, ambiguous queries that location resolves, or a deliberate typo limit. Diagnose before tuning.
+**Takeaway:** across both rounds, only 3 of 9 failures needed a search change; the rest were client-data labels, ambiguous queries that location resolves, or a deliberate typo limit. Diagnose before tuning.
 
 _Round 1:_ only 1 of the 3 failures needed a search change. The other two were a data-quality issue and an ambiguous query that location resolves. Diagnose before tuning.
 
@@ -285,13 +285,13 @@ Built with an AI coding assistant (Claude) for data exploration, scripts, index 
 
 ---
 
-## 9. Debrief & Customer Call Prep
+## 9. Presentation Prep
 
-_To prepare in step 6 (interview prep). Starting points: README "Approach", §7 above, and §12 for client questions._
+_To prepare. Starting points: README "Approach", §7 above, and §12 for client questions._
 
-### Technical debrief talking points
+### Technical walkthrough talking points
 
-### Mock customer call: discovery questions to ask
+### Discovery questions to ask
 
 ### Demo script / flow
 
@@ -314,7 +314,7 @@ _To prepare in step 6 (interview prep). Starting points: README "Approach", §7 
 
 ## 12. Questions for Client
 
-Questions only OpenTable can answer: data gaps, assumptions we made, and things that would change the design. Each one lists the assumption we're using in the meantime. Bring these to the mock customer call: they show we did the data work and they open a conversation. (Business/discovery questions live in §9.)
+Questions only OpenTable can answer: data gaps, assumptions we made, and things that would change the design. Each one lists the assumption we're using in the meantime. Bring these to the customer conversation: they show we did the data work and they open a conversation. (Business/discovery questions live in §9.)
 
 ### Data quality & meaning
 | # | Question | Why it matters | Our assumption until answered |
