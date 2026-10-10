@@ -1,6 +1,6 @@
 # OpenTable × Algolia: Restaurant Search & Discovery
 
-A prototype of a modern restaurant search and discovery experience for OpenTable, built on Algolia for the Algolia Solutions Engineer hiring assignment.
+A prototype of a modern restaurant search and discovery experience for OpenTable, built on Algolia.
 
 **Live demo:** https://algolia-assignment-opentable.vercel.app/
 
