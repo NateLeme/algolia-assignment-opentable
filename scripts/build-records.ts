@@ -1,5 +1,5 @@
 /**
- * Step 1: Build clean Algolia records from the two raw client files.
+ * Step 1 (data prep): build clean Algolia records from the two raw client files.
  *
  * Joins restaurants_list.json + restaurants_info.csv on objectID, applies every
  * cleanup decision documented in DevNotes §4, validates the result, and writes

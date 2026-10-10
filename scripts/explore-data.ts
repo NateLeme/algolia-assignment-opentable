@@ -1,5 +1,5 @@
 /**
- * Step 2: Data exploration (read-only).
+ * Step 1 (data prep): data exploration, read-only.
  *
  * Profiles the two raw files BEFORE we write any cleanup logic, so every
  * transformation in the indexing script is justified by something we observed.

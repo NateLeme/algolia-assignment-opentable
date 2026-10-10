@@ -6,7 +6,7 @@ import { badgeFor } from '../lib/badges';
 import { BrandCountsContext } from '../lib/brands';
 import { cuisineGradient, cuisineIcon, cuisinePhoto } from '../lib/cuisineStyle';
 import { formatDistance, LocationContext, placeName } from '../lib/location';
-import { toggleSaved, useSaved } from '../lib/saved';
+import { toggleFavorite, useFavorites } from '../lib/favorites';
 import type { Restaurant } from '../types/restaurant';
 import { StarRating } from './StarRating';
 
@@ -37,11 +37,11 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
   const badge = badgeFor(hit);
   // Gradient + icon stay underneath: shown while the photo loads, or if it fails.
   const [photoFailed, setPhotoFailed] = useState(false);
-  const isSaved = useSaved().has(hit.objectID);
+  const isFavorite = useFavorites().has(hit.objectID);
 
-  const save = () => {
+  const toggle = () => {
     // Favoriting is a preference signal: send it as a conversion for Personalization.
-    if (toggleSaved(hit.objectID)) sendEvent('conversion', hit, 'Restaurant Favorited');
+    if (toggleFavorite(hit.objectID)) sendEvent('conversion', hit, 'Restaurant Favorited');
   };
 
   const book = () => {
@@ -67,12 +67,12 @@ export function RestaurantCard({ hit, sendEvent, onShowBrand, showBrandLink = tr
         {distance && <span className="card-distance" title={distanceTitle}>{distance}</span>}
         {badge && <span className={`card-badge badge-${badge.tone}`}>{badge.label}</span>}
         <button
-          className={`card-save ${isSaved ? 'is-saved' : ''}`}
-          aria-label={isSaved ? `Remove ${hit.name} from favorites` : `Add ${hit.name} to favorites`}
-          aria-pressed={isSaved}
-          onClick={(e) => { e.stopPropagation(); save(); }}
+          className={`card-favorite ${isFavorite ? 'is-favorite' : ''}`}
+          aria-label={isFavorite ? `Remove ${hit.name} from favorites` : `Add ${hit.name} to favorites`}
+          aria-pressed={isFavorite}
+          onClick={(e) => { e.stopPropagation(); toggle(); }}
         >
-          {isSaved ? '♥' : '♡'}
+          {isFavorite ? '♥' : '♡'}
         </button>
       </div>
 

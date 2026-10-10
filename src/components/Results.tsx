@@ -9,7 +9,7 @@ import {
   useSearchBox,
 } from 'react-instantsearch';
 import { SORT_OPTIONS } from '../lib/algolia';
-import { CollectionContext, SAVED } from '../lib/collections';
+import { CollectionContext, FAVORITES } from '../lib/collections';
 import { DistanceContext } from '../lib/distance';
 import type { Restaurant } from '../types/restaurant';
 import { RestaurantCard } from './RestaurantCard';
@@ -58,7 +58,7 @@ function NoResults() {
   const { refine } = useSearchBox();
   const { radiusMi, setRadiusMi } = useContext(DistanceContext);
   const { collection } = useContext(CollectionContext);
-  if (collection?.id === SAVED.id && !indexUiState.query) {
+  if (collection?.id === FAVORITES.id && !indexUiState.query) {
     return (
       <div className="empty">
         <h3>No favorites yet</h3>

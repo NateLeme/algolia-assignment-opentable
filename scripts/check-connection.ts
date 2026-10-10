@@ -1,5 +1,5 @@
 /**
- * Step 1 sanity check: can we reach Algolia with the keys in .env?
+ * Setup check: can we reach Algolia with the keys in .env?
  *
  * Run:  npm run check:algolia
  *

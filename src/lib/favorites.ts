@@ -4,7 +4,7 @@ import { useSyncExternalStore } from 'react';
 // browser only: a demo convenience, not an account feature. Favoriting also sends an
 // Algolia conversion event (see RestaurantCard), a preference signal Personalization
 // can learn from.
-const STORAGE_KEY = 'saved-restaurants';
+const STORAGE_KEY = 'saved-restaurants'; // original key kept so existing favorites survive
 
 function read(): Set<string> {
   try {
@@ -14,11 +14,11 @@ function read(): Set<string> {
   }
 }
 
-let saved = read();
+let favorites = read();
 const listeners = new Set<() => void>();
 
 function write(next: Set<string>) {
-  saved = next;
+  favorites = next;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]));
   } catch {
@@ -27,21 +27,21 @@ function write(next: Set<string>) {
   listeners.forEach((l) => l());
 }
 
-export function toggleSaved(objectID: string) {
-  const next = new Set(saved);
+export function toggleFavorite(objectID: string) {
+  const next = new Set(favorites);
   if (next.has(objectID)) next.delete(objectID);
   else next.add(objectID);
   write(next);
   return next.has(objectID);
 }
 
-/** Re-renders every card when anything is saved or unsaved. */
-export function useSaved() {
+/** Re-renders every card when a favorite is added or removed. */
+export function useFavorites() {
   return useSyncExternalStore(
     (listener) => {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    () => saved,
+    () => favorites,
   );
 }

@@ -8,26 +8,24 @@ import type { Restaurant } from '../types/restaurant';
 import { RestaurantCard } from './RestaurantCard';
 import { SkeletonCards } from './SkeletonCard';
 
-// Persona 2 (exploring): shown when the search box is empty, instead of a blank page.
-// Each rail is a nested <Index> that inherits the location from the main search and
-// adds its collection's filter. Cost note: each rail is one extra search request per page view.
-
-// Each rail fetches extra hits so it can still show a full row after removing
-// restaurants already shown in an earlier rail (same request, just more hits).
+// Discovery rows (persona 2), shown when the search box is empty. Each row is a nested
+// <Index> that inherits the main search's location and adds its collection's filter:
+// one extra search request per row. Rows fetch extra hits so they stay full after
+// skipping restaurants already shown in a row above.
 const SHOWN_PER_RAIL = 8;
 const FETCHED_PER_RAIL = 16;
 
 interface RailHitsProps {
   collection: Collection;
   title: string;
-  onSeeAll: (collection: Collection) => void;
+  onViewAll: (collection: Collection) => void;
   railIndex: number;
   visibleIds: Set<string> | undefined;
   onIds: (railIndex: number, ids: string[]) => void;
   onShowBrand: (brand: string) => void;
 }
 
-function RailHits({ collection, title, onSeeAll, railIndex, visibleIds, onIds, onShowBrand }: RailHitsProps) {
+function RailHits({ collection, title, onViewAll, railIndex, visibleIds, onIds, onShowBrand }: RailHitsProps) {
   const { items, results, sendEvent } = useHits<Hit<Restaurant>>();
   const trackRef = useRef<HTMLDivElement>(null);
   // Which directions can still scroll: arrows gray out at either end.
@@ -64,7 +62,7 @@ function RailHits({ collection, title, onSeeAll, railIndex, visibleIds, onIds, o
         {/* Opens the full results with this row's exact filter. */}
         {!loading && shown.length > 0 && (
           <>
-            <button className="rail-view-all" onClick={() => onSeeAll(collection)}>
+            <button className="rail-view-all" onClick={() => onViewAll(collection)}>
               View all ({results.nbHits.toLocaleString()}) →
             </button>
             {/* In the header, not over the cards. Gray when that end is reached. */}
@@ -80,12 +78,10 @@ function RailHits({ collection, title, onSeeAll, railIndex, visibleIds, onIds, o
       ) : !shown.length ? (
         <p className="muted">Nothing nearby yet. Try another city.</p>
       ) : (
-        <div className="rail-body">
-          <div className="rail-track" ref={trackRef} onScroll={updateArrows}>
-            {shown.map((hit, i) => (
-              <RestaurantCard key={hit.objectID} hit={hit} position={i} sendEvent={sendEvent} onShowBrand={onShowBrand} />
-            ))}
-          </div>
+        <div className="rail-track" ref={trackRef} onScroll={updateArrows}>
+          {shown.map((hit, i) => (
+            <RestaurantCard key={hit.objectID} hit={hit} position={i} sendEvent={sendEvent} onShowBrand={onShowBrand} />
+          ))}
         </div>
       )}
     </>
@@ -94,10 +90,10 @@ function RailHits({ collection, title, onSeeAll, railIndex, visibleIds, onIds, o
 
 interface Props {
   onShowBrand: (brand: string) => void;
-  onSeeAll: (collection: Collection) => void;
+  onViewAll: (collection: Collection) => void;
 }
 
-export function DiscoveryRails({ onShowBrand, onSeeAll }: Props) {
+export function DiscoveryRails({ onShowBrand, onViewAll }: Props) {
   const location = useContext(LocationContext);
   const where = location.source === 'preset' ? `in ${location.label}` : 'near you';
 
@@ -129,7 +125,7 @@ export function DiscoveryRails({ onShowBrand, onSeeAll }: Props) {
         <section key={rail.id} className="rail">
           <Index indexName={INDEX} indexId={`rail-${rail.id}`}>
             <Configure filters={rail.filters} hitsPerPage={FETCHED_PER_RAIL} />
-            <RailHits collection={rail} title={rail.nearTitle ? `${rail.title} ${where}` : rail.title} onSeeAll={onSeeAll} railIndex={i} visibleIds={visible[i]} onIds={onIds} onShowBrand={onShowBrand} />
+            <RailHits collection={rail} title={rail.nearTitle ? `${rail.title} ${where}` : rail.title} onViewAll={onViewAll} railIndex={i} visibleIds={visible[i]} onIds={onIds} onShowBrand={onShowBrand} />
           </Index>
         </section>
       ))}

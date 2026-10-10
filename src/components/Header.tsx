@@ -1,8 +1,8 @@
 import { useContext } from 'react';
 import { SearchBox, useInstantSearch } from 'react-instantsearch';
-import { CollectionContext, SAVED } from '../lib/collections';
+import { CollectionContext, FAVORITES } from '../lib/collections';
 import { DistanceContext } from '../lib/distance';
-import { useSaved } from '../lib/saved';
+import { useFavorites } from '../lib/favorites';
 import { SEARCH_DEBOUNCE_MS } from '../lib/algolia';
 import type { UserLocation } from '../lib/location';
 import { LocationPicker } from './LocationPicker';
@@ -20,15 +20,15 @@ interface Props {
 }
 
 /** Opens Favorites: only favorited restaurants, any distance, no other filters. */
-function SavedButton() {
-  const count = useSaved().size;
+function FavoritesButton() {
+  const count = useFavorites().size;
   const { collection, setCollection } = useContext(CollectionContext);
   const { setRadiusMi } = useContext(DistanceContext);
   const { setIndexUiState } = useInstantSearch();
-  const active = collection?.id === SAVED.id;
+  const active = collection?.id === FAVORITES.id;
 
   const open = () => {
-    setCollection(SAVED);
+    setCollection(FAVORITES);
     setRadiusMi(null);
     setIndexUiState((state) => ({ sortBy: state.sortBy })); // clear search + filters, keep sort
     window.scrollTo({ top: 0 });
@@ -36,14 +36,14 @@ function SavedButton() {
 
   return (
     <button
-      className={`saved-button ${active ? 'is-active' : ''}`}
+      className={`favorites-button ${active ? 'is-active' : ''}`}
       onClick={active ? () => setCollection(null) : open}
       aria-label={`Favorites: ${count}`}
       aria-pressed={active}
     >
       <span aria-hidden>{count > 0 ? '♥' : '♡'}</span>
-      <span className="saved-label">Favorites</span>
-      {count > 0 && <span className="saved-count">{count}</span>}
+      <span className="favorites-label">Favorites</span>
+      {count > 0 && <span className="favorites-count">{count}</span>}
     </button>
   );
 }
@@ -69,7 +69,7 @@ export function Header({ location, onChoosePreset, onUseMyLocation }: Props) {
           {/* Centered in the space to the right of the search bar (phones: joins the grid). */}
           <div className="header-actions">
             <LocationPicker location={location} onChoosePreset={onChoosePreset} onUseMyLocation={onUseMyLocation} />
-            <SavedButton />
+            <FavoritesButton />
           </div>
         </div>
       </div>

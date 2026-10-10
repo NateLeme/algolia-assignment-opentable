@@ -1,5 +1,5 @@
 /**
- * Step 2: Push records + configuration to Algolia.
+ * Step 2 (relevance): push records + configuration to Algolia.
  *
  * Reads data/processed/restaurants.json (run `npm run build:records` first) and
  * applies settings, replicas, synonyms and rules from scripts/lib/index-config.ts.

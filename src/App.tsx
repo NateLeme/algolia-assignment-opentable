@@ -1,29 +1,18 @@
 import { history } from 'instantsearch.js/es/lib/routers';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Configure, InstantSearch, useInstantSearch, useRefinementList } from 'react-instantsearch';
+import { useContext, useMemo, useState } from 'react';
+import { Configure, InstantSearch, useInstantSearch } from 'react-instantsearch';
 import { ActiveFilters } from './components/ActiveFilters';
 import { DiscoveryHero } from './components/DiscoveryHero';
 import { DiscoveryRails } from './components/DiscoveryRails';
 import { Filters, MobileFiltersButton } from './components/Filters';
 import { Header } from './components/Header';
 import { Results } from './components/Results';
-import { AROUND_PRECISION, INDEX, searchClient, SORT_OPTIONS } from './lib/algolia';
-import { BrandCountsContext } from './lib/brands';
-import { CollectionContext, SAVED, savedFilters, type Collection } from './lib/collections';
-import { DistanceContext, milesToMeters, SORT_DEFAULT_RADIUS_MI } from './lib/distance';
-import { LocationContext, placeName, useUserLocation } from './lib/location';
-import { useSaved } from './lib/saved';
-
-// Exact brand filter for "N locations", which also returns per-brand counts for the
-// current search and filters (shown in the link label).
-// A text search for the brand name would go through typo tolerance and query rules:
-// "Morton's The Steakhouse" became cuisine:Steakhouse + "morton's", matching Morton's Grille.
-// Renders nothing: it only registers the filter with InstantSearch.
-const BRAND_FILTER = { attribute: 'brand', operator: 'and', limit: 200 } as const;
-function useBrandCounts() {
-  const { items } = useRefinementList(BRAND_FILTER);
-  return useMemo(() => new Map(items.map((i) => [i.value, i.count])), [items]);
-}
+import { AROUND_PRECISION, INDEX, searchClient } from './lib/algolia';
+import { BrandCountsContext, useBrandCounts } from './lib/brands';
+import { CollectionContext, FAVORITES, favoritesFilters, type Collection } from './lib/collections';
+import { DistanceContext, milesToMeters, useSortDefaultRadius } from './lib/distance';
+import { LocationContext, useUserLocation } from './lib/location';
+import { useFavorites } from './lib/favorites';
 
 /** Empty search box and no filters → discovery page; otherwise → results. */
 function Main() {
@@ -36,39 +25,12 @@ function Main() {
       page: undefined,
       refinementList: { ...state.refinementList, brand: [brand] },
     }));
-  // Keep sorted results local: when the diner picks a sort and distance is "Any",
-  // apply the default radius once. Removing the chip afterwards is respected.
-  const { radiusMi, radiusIsAuto, setRadiusMi, applyAutoRadius } = useContext(DistanceContext);
-  const { results } = useInstantSearch();
-  const location = useContext(LocationContext);
-  const [widenedNotice, setWidenedNotice] = useState<string | null>(null);
-  const sortBy = indexUiState.sortBy;
-  const previousSort = useRef(sortBy);
-  useEffect(() => {
-    const sortChanged = sortBy !== previousSort.current;
-    previousSort.current = sortBy;
-    if (!sortChanged) return;
-    setWidenedNotice(null);
-    if (sortBy && sortBy !== INDEX && radiusMi === null) applyAutoRadius(SORT_DEFAULT_RADIUS_MI);
-  }, [sortBy, radiusMi, applyAutoRadius]);
-
-  // The default is "soft": if the radius the app chose finds nothing (e.g. an IP-based
-  // location with no matches nearby), go back to any distance and say why.
-  // Only acts on results for that radius, never on a distance the diner chose.
-  useEffect(() => {
-    const searchedRadius = (results as unknown as { _state?: { aroundRadius?: unknown } })._state?.aroundRadius;
-    if (!radiusIsAuto || radiusMi === null || results.nbHits !== 0 || searchedRadius !== milesToMeters(radiusMi)) return;
-    const sortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label.toLowerCase() ?? 'sorted';
-    setWidenedNotice(`Nothing within ${radiusMi} miles of ${placeName(location)}, so showing ${sortLabel} results from everywhere.`);
-    setRadiusMi(null);
-  }, [results, radiusIsAuto, radiusMi, sortBy, location, setRadiusMi]);
-  useEffect(() => setWidenedNotice(null), [indexUiState.query]);
-
+  const widenedNotice = useSortDefaultRadius();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // "See all" on a discovery row: full results with that row's exact filter (+ its sort).
+  // "View all" on a discovery row: full results with that row's exact filter (+ its sort).
   const { collection, setCollection } = useContext(CollectionContext);
-  const seeAll = (c: Collection) => {
+  const viewAll = (c: Collection) => {
     setCollection(c);
     setIndexUiState((state) => ({ ...state, page: undefined, ...(c.sortBy ? { sortBy: c.sortBy } : {}) }));
     window.scrollTo({ top: 0 });
@@ -90,7 +52,7 @@ function Main() {
           <ActiveFilters />
           {widenedNotice && <p className="notice">{widenedNotice}</p>}
           {isBrowsing && <DiscoveryHero />}
-          {isBrowsing && <DiscoveryRails onShowBrand={showBrand} onSeeAll={seeAll} />}
+          {isBrowsing && <DiscoveryRails onShowBrand={showBrand} onViewAll={viewAll} />}
           {isBrowsing && <h2 className="section-title">All restaurants</h2>}
           <Results onShowBrand={showBrand} />
         </div>
@@ -105,8 +67,8 @@ export default function App() {
   const [radiusIsAuto, setRadiusIsAuto] = useState(false);
   const [collection, setCollection] = useState<Collection | null>(null);
   const collectionValue = useMemo(() => ({ collection, setCollection }), [collection]);
-  const saved = useSaved();
-  const collectionFilters = collection?.id === SAVED.id ? savedFilters(saved) : collection?.filters ?? '';
+  const favorites = useFavorites();
+  const collectionFilters = collection?.id === FAVORITES.id ? favoritesFilters(favorites) : collection?.filters ?? '';
   const distance = useMemo(
     () => ({
       radiusMi,

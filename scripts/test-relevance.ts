@@ -1,5 +1,5 @@
 /**
- * Step 2: Relevance test suite.
+ * Step 2 (relevance): relevance test suite.
  *
  * Runs realistic queries for both personas against the live index and checks the
  * results against what a diner would expect. Re-run after every config change;

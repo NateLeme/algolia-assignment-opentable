@@ -26,6 +26,7 @@ Personal progress log, one short line per step: which step, why it matters, and 
 
 | Date | Step | Entry |
 |---|---|---|
+| 2026-10-09 | 5: Ship (write-up + cleanup) | To make the submission self-explanatory and the code easy to defend, wrote the README (approach, data prep, configuration, testing, trade-offs, client questions, AI usage), renamed code to match the UI (Favorites, View all), split App logic into hooks, removed dead code, reorganised the CSS and filled the empty DevNotes sections; 57/57 tests still pass. |
 | 2026-10-09 | 3: Frontend (polish) | To make discovery cleaner and use screen space, replaced the end-of-row "See all" tile with a discreet "View all (N) →" link per row, grayed out row arrows at either end, renamed Saved to Favorites (event "Restaurant Favorited"), and made the desktop layout full width. |
 | 2026-10-09 | 3: Frontend (Saved page) | To give saved favorites somewhere to live, added a "♥ Saved N" header button that opens the saved restaurants as a collection (Algolia filter built live from the saved objectIDs, so unsaving updates instantly), with an empty state and a compact phone header. |
 | 2026-10-09 | 3: Frontend (modern UI) | To make the experience feel like a modern consumer product, added visual star ratings, data-driven badges (Top rated / Popular / Hidden gem), a save ♡ that sends a "Restaurant Saved" event, loading placeholders, the Inter font, a more prominent search bar, representative cuisine photos (45 free-license images rotating so neighbours differ; the data's image URLs are dead, Client Q2) and squarer corners from three shared radius values. Also fixed Vercel deploys by committing with the NateLeme GitHub email. |
@@ -174,21 +175,31 @@ Framing: we're treating these files as a real export from OpenTable. Anything we
 
 ## 5. Index Configuration
 
-<!-- Each setting and WHY. Keep in sync with the settings file in the repo. -->
+Source of truth: `scripts/lib/index-config.ts` (every setting has a comment). Pushed with `npm run push:index` (`--only=<part>` while tuning).
 
 ### Searchable attributes
+`name` first, then `cuisines`, `tags`, `food_type`, `neighborhood`, `city`, `metro_area`, `dining_style`, `address`, all `unordered` except `name`. **Why:** a name match must beat a cuisine or location match (persona 1); the original `food_type` stays searchable for specific terms ("cuban", "provençal").
 
 ### Custom ranking
+`desc(rating_score)`, `desc(reviews_count)`. `rating_score` is a Bayesian average (m = 50, C = 4.29) rounded to one decimal so review count can break ties. Filters use the displayed `stars_count` instead (see Dev Log 2026-10-09).
 
 ### Facets / filters
+`cuisine_hierarchy.lvl0/lvl1` (region → cuisine), `searchable(cuisines)`, `searchable(tags)`, `price`, `dining_style`, `searchable(metro_area)`, `searchable(city)`, `brand` (countable, for live chain counts), `filterOnly(state)` (state rules). `maxValuesPerFacet` 200. Facet order in `renderingContent`, shared with every sort replica (replicas don't inherit it).
 
 ### Geo
+`aroundLatLng` from browser location, metro preset (center = median restaurant coordinate), or `aroundLatLngViaIP`. `aroundRadius: 'all'` (rank by distance, never exclude) unless the diner sets a distance. `aroundPrecision` bands (2 km, then 10 km, then 50 km steps) so quality decides within a band. Cards show `matchedGeoLocation.distance` (real distance), not `geoDistance` (the banded ranking value).
 
 ### Typo tolerance & query behavior
+Algolia defaults (1 typo from 4 letters, 2 from 8), `allowTyposOnNumericTokens: false`, English `ignorePlurals` + `removeStopWords`, `removeWordsIfNoResults: 'allOptional'` for long descriptive queries.
 
 ### Synonyms
+12, only for gaps Algolia can't close natively: bbq/barbecue, pub/gastropub/tavern, brunch/breakfast, hibachi/teppanyaki, churrascaria, veggie, nyc/sf/nola, and one-way sushi → japanese, fish → seafood, tex mex → mexican.
 
 ### Query Rules
+24: `detect-cuisine` and `detect-city` (facet value in the query → filter), `intent-budget` (→ $$), `intent-upscale` (→ Fine Dining), `intent-expensive` (→ $$$$), `intent-near-me` (→ IP location), `city-abbr-sf/nyc`, and 16 `state-xx` rules (codes that are words or name tokens excluded).
+
+### Sort replicas
+4 virtual replicas (top rated, most reviewed, price ↑, price ↓) with `relevancyStrictness: 0`; the app adds a soft 50-mile default radius when a sort is picked.
 
 ---
 
@@ -256,15 +267,27 @@ _Round 1:_ only 1 of the 3 failures needed a search change. The other two were a
 
 ## 7. Challenges & Trade-offs
 
+- **Chain detection without a brand ID:** name matching grouped unrelated restaurants; chose to miss some two-city chains rather than link unrelated ones (Client Q5).
+- **Ranking vs. filtering:** weighted score orders results; the rating filter uses the displayed stars, otherwise a 3.0★ with 3 reviews (weighted 4.2) passed "4.0 and up".
+- **Relevant sort + geo:** default `relevancyStrictness` kept only the nearest distance band (1 of 890); strictness 0 + soft 50-mile default.
+- **Replicas don't inherit `renderingContent`:** filter panels vanished on sorted views until the facet order was shared.
+- **Page freeze:** inline widget options rebuilt InstantSearch widgets on every render; moved to module scope.
+- **Free plan:** 3 Query Rules forced prioritisation, then the upgrade to Grow Plus.
+- **Slow Algolia task queue** during the plan change (minutes per task): added `--only=<part>` pushes.
+- **Vercel Hobby blocked deploys** from commits authored with an email not linked to the GitHub account: repo commit email set to the NateLeme noreply address.
+- **No usable photos** in the data: representative cuisine imagery, clearly labelled (Client Q2).
+
 ---
 
 ## 8. AI & Tool Usage
 
-<!-- What was AI-assisted (Claude, Algolia AI Assist, docs), and what I verified or understood myself. -->
+Built with an AI coding assistant (Claude) for data exploration, scripts, index configuration and UI code. Every decision was explained before it was made, and I chose between options myself (e.g. the "sf" city rule, the chain-detection rule, the Grow Plus upgrade, cuisine judgment calls, UI direction). Reasoning is logged in this file (Decision Log, Data Preparation, Relevance Testing Log, Client Questions) so every setting can be explained and defended. Algolia documentation was used to confirm API behaviour (e.g. virtual replica strictness, `renderingContent`, Insights events).
 
 ---
 
 ## 9. Debrief & Customer Call Prep
+
+_To prepare in step 6 (interview prep). Starting points: README "Approach", §7 above, and §12 for client questions._
 
 ### Technical debrief talking points
 
@@ -297,7 +320,7 @@ Questions only OpenTable can answer: data gaps, assumptions we made, and things 
 | # | Question | Why it matters | Our assumption until answered |
 |---|---|---|---|
 | Q1 | Which price field is authoritative: `price` (JSON) or `price_range` (CSV)? They disagree on 220 restaurants (4.4%). Is there a "$" tier? | Wrong prices hurt trust and filtering | CSV `price_range` |
-| Q2 | Where do restaurant photos come from today? Every `image_url` in the export redirects to the default placeholder. | Photos are the biggest driver of discovery and click-through | Designed cards without photos |
+| Q2 | Where do restaurant photos come from today? Every `image_url` in the export redirects to the default placeholder. | Photos are the biggest driver of discovery and click-through | Representative cuisine imagery (Unsplash), clearly labelled |
 | Q3 | How are `stars_count` / `reviews_count` calculated (all-time vs recent)? Can we get sub-ratings (food, service, ambiance) or review text? | Ranking quality; review text would enable richer search, including semantic (AI) search | All-time, comparable |
 | Q4 | Is `food_type` chosen by the restaurant or by an editor? Is there an official cuisine list? Can a restaurant have several? | Cuisine is the main filter; 114 messy values today | One primary cuisine, mapped by us |
 | Q5 | Is there a brand / restaurant-group ID for chains? | Clean grouping of chain locations (Ruth's Chris ×31) | Inferred from the name |
@@ -317,3 +340,4 @@ Questions only OpenTable can answer: data gaps, assumptions we made, and things 
 |---|---|---|
 | Q12 | How often does restaurant data change, and what's the system of record? Full exports or change events? | Indexing strategy (nightly full reindex vs. real-time partial updates) |
 | Q13 | Which events can the front end send (search, click, booking)? Any privacy constraints? | Analytics, A/B testing, personalization, AI re-ranking |
+| Q14 | Can search use the logged-in diner's ID? | A stable `userToken` for Personalization (today it's an anonymous per-browser token); favorites stored on the account instead of the browser |

@@ -2,7 +2,7 @@ import { createContext } from 'react';
 import { INDEX } from './algolia';
 
 // Curated discovery collections: each is a discovery row on the empty page, and
-// "See all" opens the full results with the row's *exact* filter (shown as a chip).
+// "View all" opens the full results with the row's *exact* filter (shown as a chip).
 // Exact filter strings rather than sidebar filters: "Hidden gems" (review count) has
 // no sidebar equivalent, and results should match the row the diner just saw.
 export interface Collection {
@@ -12,7 +12,7 @@ export interface Collection {
   /** Title gets "near you" / "in <metro>" appended. */
   nearTitle?: boolean;
   filters: string;
-  /** Sort to apply on "See all" (sort replica index name). */
+  /** Sort to apply on "View all" (sort replica index name). */
   sortBy?: string;
 }
 
@@ -28,10 +28,10 @@ export const CollectionContext = createContext<{
   setCollection: (collection: Collection | null) => void;
 }>({ collection: null, setCollection: () => {} });
 
-// "Favorites" is a collection built from the diner's favorited restaurants (src/lib/saved.ts).
-// Its filter is computed live from the saved IDs, so unsaving updates the view at once.
-export const SAVED: Collection = { id: 'saved', title: 'Favorites', filters: '' };
+// "Favorites" is a collection built from the diner's favorited restaurants (src/lib/favorites.ts).
+// Its filter is computed live from the favorite IDs, so removing one updates the view at once.
+export const FAVORITES: Collection = { id: 'favorites', title: 'Favorites', filters: '' };
 
-/** Algolia filter for the saved IDs; matches nothing when the list is empty. */
-export const savedFilters = (ids: Set<string>) =>
+/** Algolia filter for the favorite IDs; matches nothing when the list is empty. */
+export const favoritesFilters = (ids: Set<string>) =>
   ids.size ? [...ids].map((id) => `objectID:"${id}"`).join(' OR ') : 'objectID:"__none__"';
